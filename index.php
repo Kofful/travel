@@ -1,11 +1,15 @@
-<?php include_once("functions.php");?>
+<?php include_once("functions.php");
+session_start();
+
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-
-	<title>Document</title>
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+	<title>Турагентство</title>
 </head>
 <body>
 	<div class="container">
@@ -15,11 +19,9 @@
 			</header>
 		</div>
 		<div class="row">
-			<nav>
-				<?php
-				include_once("pages/menu.php");
-				?>
-			</nav>
+			<?php
+			include_once("pages/menu.php");
+			?>
 		</div>
 		<div class="row">
 			<section class="col-sm-6 col-md-6 col-lg-6 offset-sm-3 offset-md-3 offset-lg-3">
@@ -29,6 +31,12 @@
 				if($page=="searchtour") {include_once("pages/searchtour.php");}
 				if($page=="hottour") {include_once("pages/hottour.php");}
 				if($page=="admin"){include_once("pages/admin.php");}
+				if($page=="login"){include_once("pages/login.php");}
+				if($page=="register"){include_once("pages/register.php");}
+				if($page=="logout") {
+					session_destroy();
+					echo "<script>window.location.href='/'</script>";
+				}
 			}
 			?>
 		</section>
