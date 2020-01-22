@@ -6,9 +6,11 @@ session_start();
 <!DOCTYPE html>
 <html lang="en">
 <head>
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js" type="text/javascript"></script>
 	<meta charset="UTF-8">
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-	<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+	<link rel="stylesheet" href="../css/styles.css">
+	<link href="https://fonts.googleapis.com/css?family=Roboto+Condensed&display=swap" rel="stylesheet">
 	<title>Турагентство</title>
 </head>
 <body>
@@ -24,17 +26,22 @@ session_start();
 			?>
 		</div>
 		<div class="row">
-			<section class="col-sm-6 col-md-6 col-lg-6 offset-sm-3 offset-md-3 offset-lg-3">
+			<!--<section class="col-sm-6 col-md-6 col-lg-6 offset-sm-3 offset-md-3 offset-lg-3">-->
+				<secton>
 				<?php
 				if(isset($_GET['page'])) {$page=$_GET['page'];
-				if($page=="main") {include_once("pages/main.php");}
-				if($page=="searchtour") {include_once("pages/searchtour.php");}
-				if($page=="hottour") {include_once("pages/hottour.php");}
-				if($page=="admin"){include_once("pages/admin.php");}
-				if($page=="login"){include_once("pages/login.php");}
-				if($page=="register"){include_once("pages/register.php");}
+				if($page=="main") {include_once("pages/main.php");} else
+				if($page=="searchtour") {include_once("pages/searchtour.php");} else
+				if($page=="hottour") {include_once("pages/hottour.php");} else
+				if($page=="admin"){include_once("pages/admin.php");} else
+				if($page=="login"){include_once("pages/login.php");} else
+				if($page=="register"){include_once("pages/register.php");} else
 				if($page=="logout") {
 					session_destroy();
+					echo "<script>window.location.href='/'</script>";
+				} else 
+				if($page=="hotel") {include_once("pages/hotel.php");}
+				else {
 					echo "<script>window.location.href='/'</script>";
 				}
 			}
@@ -42,7 +49,7 @@ session_start();
 		</section>
 	</div>
 	<div class="row">
-		<footer>
+		<footer style='height: 40px'>
 
 		</footer>
 	</div>

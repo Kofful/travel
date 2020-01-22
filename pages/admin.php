@@ -59,7 +59,7 @@ if($_SESSION['permit'] != 'admin') {
 	<label>Добавить отель:</label><br>
 	<label>Название:</label><input type="text" name="hotel"><br>
 	<label>Цена:</label><input type="number" name="price"><br>
-	<label>Описание:</label><input type="text" name="description"><br>
+	<label>Описание:</label><br><textarea name="description" maxlength="1300" style="width:100%;height:200px"></textarea><br>
 	<label>Картинки:</label><input accept="image/*" type="file" name="image[]" multiple><br>
 	<button type="submit" class="btn btn-primary" name="btn_hotel">Добавить</button>
 </form>
@@ -71,11 +71,12 @@ if($_SESSION['permit'] != 'admin') {
 		function onChangeCountry() {
 			$.post('functions.php', { btn_get_states: 0,country: 12 }, function(data){
 				alert('ajax completed. Response:  '+ data);
+
                     //do after submission operation in DOM
                 });
 		}
 	</script>
-	<select id='countries' name="country" onchange="onChangeCountry()"> 
+	<select id='countries1' name="country" onchange="onChangeCountry()"> 
 		<?php
 		$countries = getCountries();
 		while($row = mysqli_fetch_array($countries)) {
