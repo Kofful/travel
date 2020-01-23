@@ -30,21 +30,28 @@ if($_SESSION['permit'] != 'admin') {
 
 	<label>Страна</label> 
 	<script>
-		function onChangeCountry() {
-			$.post('functions.php', { btn_get_states: 0,country: 12 }, function(data){
-				alert('ajax completed. Response:  '+ data);
-                    //do after submission operation in DOM
-                });
+		function onChangeCountry(country) {
+			$.post('functions.php', { get_states: 0,country: country.value }, function(data){
+				let states = $('#states')[0].options;
+				for (i = states.length; i > -1; i--) {
+					states[i] = null;
+				}
+				data = JSON.parse(data);
+				states = $('#states');
+				data.forEach((state) => {
+					states.append("<option value='" +  state['id']+ "'>" + state['state'] + "</option>")
+				});
+			});
 		}
 	</script>
-	<select id='countries' name="country" onchange="onChangeCountry()"> 
+	<select id='countries' name="country" onchange="onChangeCountry(this)"> 
 		<?php
 		$countries = getCountries();
 		while($row = mysqli_fetch_array($countries)) {
 			echo "<option value='".$row['id']. ($row['id'] == $_POST['country'] ? "'selected>" :"'>").$row['country']."</option>";
 		}
 		?>
-	</select><button type="submit" class="btn btn-primary" name="btn_get_states">Получить города</button><br>
+	</select><br>
 	<label>Город</label>
 	<select id="states" name="state">
 		<?php
@@ -59,6 +66,7 @@ if($_SESSION['permit'] != 'admin') {
 	<label>Добавить отель:</label><br>
 	<label>Название:</label><input type="text" name="hotel"><br>
 	<label>Цена:</label><input type="number" name="price"><br>
+	<input type="checkbox" name="hot"><label>Сохранить как горящий тур</label><br>
 	<label>Описание:</label><br><textarea name="description" maxlength="1300" style="width:100%;height:200px"></textarea><br>
 	<label>Картинки:</label><input accept="image/*" type="file" name="image[]" multiple><br>
 	<button type="submit" class="btn btn-primary" name="btn_hotel">Добавить</button>
@@ -68,24 +76,46 @@ if($_SESSION['permit'] != 'admin') {
 	<label>Удалить отель:</label><br>
 	<label>Страна</label> 
 	<script>
-		function onChangeCountry() {
-			$.post('functions.php', { btn_get_states: 0,country: 12 }, function(data){
-				alert('ajax completed. Response:  '+ data);
-
-                    //do after submission operation in DOM
-                });
+		function onChangeCountry1(country) {
+			$.post('functions.php', { get_states: 0,country: country.value }, function(data){
+				let states = $('#states2')[0].options;
+				for (i = states.length; i > -1; i--) {
+					states[i] = null;
+				}
+				data = JSON.parse(data);
+				states = $('#states2');
+				data.forEach((state) => {
+					states.append("<option value='" +  state['id']+ "'>" + state['state'] + "</option>")
+				});
+			});
 		}
 	</script>
-	<select id='countries1' name="country" onchange="onChangeCountry()"> 
+	<select id='countries1' name="country" onchange="onChangeCountry1(this)"> 
 		<?php
 		$countries = getCountries();
 		while($row = mysqli_fetch_array($countries)) {
 			echo "<option value='".$row['id']. ($row['id'] == $_POST['country'] ? "'selected>" :"'>").$row['country']."</option>";
 		}
 		?>
-	</select><button type="submit" class="btn btn-primary" name="btn_get_states1">Получить города</button><br>
+	</select><br>
 	<label>Город</label>
-	<select id="states2" name="state">
+	<script>
+		function onChangeState(state) {
+			$.post('functions.php', { get_hotels: 0,state: state.value, country:$('#countries')[0]['value'] }, function(data){
+				let hotels = $('#hotels')[0].options;
+				for (i = hotels.length; i > -1; i--) {
+					hotels[i] = null;
+				}
+				data = JSON.parse(data);
+				hotels = $('#hotels');
+				data.forEach((hotel) => {
+					console.log(hotel);
+					hotels.append("<option value='" +  hotel['id']+ "'>"	 + hotel['hotel'] + "</option>")
+				});
+			});
+		}
+	</script>
+	<select id="states2" name="state" onchange="onChangeState(this)">
 		<?php
 		if(isset($_POST['states1'])) {
 			while($row = mysqli_fetch_array($_POST['states1'])) {
@@ -93,9 +123,9 @@ if($_SESSION['permit'] != 'admin') {
 			}
 		}
 		?>
-	</select><button type="submit" class="btn btn-primary" name="btn_get_hotels">Получить отели</button><br>
+	</select><br>
 	<label>Отель:</label>
-	<select name="hotel">
+	<select id="hotels" name="hotel">
 		<?php
 		if(isset($_POST['hotels'])) {
 			while($row = mysqli_fetch_array($_POST['hotels'])) {

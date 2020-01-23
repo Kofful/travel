@@ -25,7 +25,7 @@ if(isset($_POST['btn_country_del'])) {
 			exit();
 		} else {
 			$query = "SELECT * FROM `photos` WHERE hotel_id IN (SELECT id FROM `hotels` WHERE state_id IN (SELECT id FROM `states` WHERE country_id = $country_id))";
-			$uploaddir = 'D:/OSPanel/domains/travel/images/uploads/';
+			$uploaddir = 'D:/OSPanel/domains/mandrivka/images/uploads/';
 			$result = mysqli_query($link, $query);
 			while($row = mysqli_fetch_array($result)) {
 				unlink($uploaddir.$row['path']);
@@ -66,7 +66,7 @@ if(isset($_POST['btn_state_del'])) {
 			exit();
 		} else {
 			$query = "SELECT * FROM `photos` WHERE hotel_id IN (SELECT id FROM `hotels` WHERE state_id = $state_id)";
-			$uploaddir = 'D:/OSPanel/domains/travel/images/uploads/';
+			$uploaddir = 'D:/OSPanel/domains/mandrivka/images/uploads/';
 			$result = mysqli_query($link, $query);
 			while($row = mysqli_fetch_array($result)) {
 				unlink($uploaddir.$row['path']);
@@ -85,6 +85,8 @@ if(isset($_POST['btn_hotel'])) {
 	$state_id = $_POST['state'];
 	$hotel = $_POST['hotel'];
 	$price = $_POST['price'];
+	$hot = $_POST['hot'];
+	$hot = $hot == "on" ? 1 : 0;
 	$description = $_POST['description'];
 	$image = $_POST['image'];
 	$link = mysqli_connect("localhost", "root", "12345", "travel");
@@ -93,12 +95,12 @@ if(isset($_POST['btn_hotel'])) {
 			echo "No connection1<br>" . mysqli_connect_error();
 			exit();
 		} else {
-			$query = "INSERT INTO `hotels` (id, hotel, price, description, state_id) VALUES ('', '$hotel', '$price', '$description', '$state_id')";
+			$query = "INSERT INTO `hotels` (id, hotel, price, description, state_id, is_hot) VALUES ('', '$hotel', '$price', '$description', '$state_id', $hot)";
 			if(!mysqli_query($link, $query)) {
 				echo"No connection2 " . mysqli_connect_error();
 				exit();
 			} 
-			$uploaddir = 'D:/OSPanel/domains/travel/images/uploads/';
+			$uploaddir = 'D:/OSPanel/domains/mandrivka/images/uploads/';
 			$total = count($_FILES['image']['name']);
 			$files = array();
 			for($i = 0; $i < $total; $i++) {
@@ -145,7 +147,7 @@ if(isset($_POST['btn_hotel_del'])) {
 			exit();
 		} else {
 			$query = "SELECT * FROM `photos` WHERE hotel_id = $hotel_id";
-			$uploaddir = 'D:/OSPanel/domains/travel/images/uploads/';
+			$uploaddir = 'D:/OSPanel/domains/mandrivka/images/uploads/';
 			$result = mysqli_query($link, $query);
 			while($row = mysqli_fetch_array($result)) {
 				unlink($uploaddir.$row['path']);
@@ -160,54 +162,35 @@ if(isset($_POST['btn_hotel_del'])) {
 	mysqli_close($link);
 }
 
-//получение городов
-if(isset($_POST['btn_get_states'])) {
+//получение городов jquery
+if(isset($_POST['get_states'])) {
 	$index= $_POST['country'];
-	$_POST['states'] = getStates($index);
-}
-//получение городов
-if(isset($_POST['btn_get_states1'])) {
-	$index= $_POST['country'];
-	$_POST['states1'] = getStates($index);
+	$resut = array();
+	$states = getStates($index);
+	$i = 0;
+	while($row = mysqli_fetch_array($states)) {
+		$result[$i] = $row;
+		$i++;
+	}
+	echo json_encode($result);
 }
 
-//получить отели
-if(isset($_POST['btn_get_hotels'])) {
+//получить отели jquery
+if(isset($_POST['get_hotels'])) {
 	if(isset($_POST['state'])) {
 		$index = $_POST['state'];
 	}
 	if(isset($_POST['country'])) {
 		$country = $_POST['country'];
 	}
-	$_POST['states1'] = getStates($country);
-	$_POST['hotels'] = getHotels($index, $country);
-}
-
-
-//получить отели с выборкой
-if(isset($_POST['btn_find_hotels'])) {
-	if(isset($_POST['state'])) {
-		$index = $_POST['state'];
-	}
-	if(isset($_POST['country'])) {
-		$country = $_POST['country'];
-	}
-	$_POST['states1'] = getStates($country);
 	$hotels = getHotels($index, $country);
-	$result = array();
+	$resut = array();
 	$i = 0;
 	while($row = mysqli_fetch_array($hotels)) {
 		$result[$i] = $row;
-		$result[$i]['photos'] = array();
-		$photos = getPhotos($row['id']);
-		$j = 0;
-		while($photo = mysqli_fetch_array($photos)) {
-			$result[$i]['photos'][$j] = $photo;
-			$j++;
-		}
 		$i++;
 	}
-	$_POST['hotels'] = $result;
+	echo json_encode($result);
 }
 
 //регистрация
@@ -326,8 +309,8 @@ function getStates($index) {
 	}
 	mysqli_close($link);
 }
-//получение отелей
-function getHotels($state = 0, $country = 0) {
+//получение отелей с выборкой
+function getHotels($state = 0, $country = 0, $hot = 0) {
 	$link = mysqli_connect("localhost", "root", "12345", "travel");
 	if(!$link) {
 		echo "No connection<br>" . mysqli_connect_error();
@@ -335,6 +318,9 @@ function getHotels($state = 0, $country = 0) {
 	} else {
 		if($country == 0) {
 			$query = "SELECT * FROM `hotels`";
+			if($hot == 1) {
+				$query.= " WHERE is_hot = 1";
+			}
 			$result = mysqli_query($link, $query);
 			if(!mysqli_query($link, $query)) {
 				echo "No connection " . mysqli_connect_error();
@@ -343,6 +329,9 @@ function getHotels($state = 0, $country = 0) {
 			return $result;
 		} else if($state == 0) {
 			$query = "SELECT * FROM `hotels` WHERE state_id IN (SELECT id FROM `states` WHERE country_id = $country)";
+			if($hot == 1) {
+				$query.= " AND is_hot = 1";
+			}
 			$result = mysqli_query($link, $query);
 			if(!mysqli_query($link, $query)) {
 				echo "No connection " . mysqli_error($link);
@@ -351,6 +340,9 @@ function getHotels($state = 0, $country = 0) {
 			return $result;
 		} else {
 			$query = "SELECT * FROM `hotels` WHERE state_id = $state";
+			if($hot == 1) {
+				$query.= " AND is_hot = 1";
+			}
 			$result = mysqli_query($link, $query);
 			if(!mysqli_query($link, $query)) {
 				echo "No connection " . mysqli_connect_error();
@@ -358,6 +350,27 @@ function getHotels($state = 0, $country = 0) {
 			} 
 			return $result;
 		}
+	}
+	mysqli_close($link);
+}
+//получение отелей без выборки
+function getMainHotels($hot) {
+	$link = mysqli_connect("localhost", "root", "12345", "travel");
+	if(!$link) {
+		echo "No connection<br>" . mysqli_connect_error();
+		exit();
+	} else {
+		$query = "SELECT `hotels`.hotel, `hotels`.id, `hotels`.price, `states`.state, `countries`.country FROM `hotels` JOIN `states` ON `states`.id = `hotels`.state_id JOIN `countries` ON `countries`.id = `states`.country_id";
+		if($hot == 1) {
+			$query.= " WHERE is_hot = 1";
+		}
+		$query.=" ORDER BY RAND() LIMIT 4";
+		$result = mysqli_query($link, $query);
+		if(!mysqli_query($link, $query)) {
+			echo "No connection " . mysqli_connect_error();
+			exit();
+		} 
+		return $result;
 	}
 	mysqli_close($link);
 }
@@ -378,14 +391,14 @@ function getPhotos($hotel) {
 	}
 	mysqli_close($link);
 }
-
+//получить информацию об отеле
 function getHotelInfo($id) {
 	$link = mysqli_connect("localhost", "root", "12345", "travel");
 	if(!$link) {
 		echo "No connection<br>" . mysqli_connect_error();
 		exit();
 	} else {
-		$query = "SELECT * FROM `hotels` WHERE id = $id";
+		$query = "SELECT `hotels`.hotel, `hotels`.id, `hotels`.price,`hotels`.description,	 `states`.state, `countries`.country FROM `hotels` JOIN `states` ON `states`.id = `hotels`.state_id JOIN `countries` ON `countries`.id = `states`.country_id WHERE `hotels`.id = $id";
 		$result = mysqli_query($link, $query);
 		if(!mysqli_query($link, $query)) {
 			echo "No connection " . mysqli_connect_error();

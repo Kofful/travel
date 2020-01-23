@@ -19,7 +19,7 @@
 
 .description {
 	font-size:14px;
-	margin-left:5px;
+	margin: 0 0 0 5px;
 	font-weight: 400;
 	font-family: 'Roboto Condensed', sans-serif;
 }
@@ -35,7 +35,14 @@
 .hotel-title {
 	font-size:30px;
 	font-weight: 700;
-	margin-top:20px;
+	margin:20px 0 0 0;
+	font-family: 'Roboto Condensed', sans-serif;
+}
+.hotel-location {	
+	font-size:18px;
+	margin: 0 0 5px 0;
+	color: rgba(10,10,10,0.7);
+	font-weight: 400;
 	font-family: 'Roboto Condensed', sans-serif;
 }
 
@@ -53,4 +60,107 @@
 	font-weight: 400;
 	margin-top:20px;
 	font-family: 'Roboto Condensed', sans-serif;
+}
+
+.title-hot {
+	font-size:36px;
+	font-weight: 400;
+	margin-top:20px;
+	font-family: 'Roboto Condensed', sans-serif;
+	text-align:center;
+}
+
+.btn-main {
+	transition: 200ms;
+	margin-top: 10px;
+	font-size: 20px;
+	font-family: 'Roboto Condensed', sans-serif;
+	color:#ffc107 !important;
+}
+.btn-main:hover {
+	color:#fff !important;
+}
+
+.main-list-item {
+	display:flex;
+	flex-direction: column;
+	box-shadow: 0 0 2px 2px rgba(0,0,0,0.1);
+	transition: 200ms;
+	margin:10px;
+}
+
+.main-list-item:hover {
+	box-shadow: 0 0 4px 4px rgba(0,0,0,0.1);
+}
+
+.main-title {
+	font-size:20px;
+	margin: 5px 0 0 5px;
+	font-weight: 700;
+	font-family: 'Roboto Condensed', sans-serif;
+}
+
+.main-title:hover {
+	text-decoration: none;
+}
+
+.main-price {
+	position: relative;
+	font-size:22px;
+	margin: 0 5px 5px 0;
+	font-weight: 400;
+	text-align: right;
+	font-family: 'Roboto Condensed', sans-serif;
+}
+
+.main-location {	
+	font-size:16px;
+	margin: 0 0 0 5px;
+	color: rgba(50,50,50,0.7);
+	font-weight: 400;
+	font-family: 'Roboto Condensed', sans-serif;
+}
+
+.main-section {
+	padding-bottom: 20px;
+	border-bottom: 1px solid rgba(120,120,120,0.2);
+}
+
+.right-form {
+	background-color: #2e3b49;
+	padding: 10px 30px 0px 30px;
+	color:#ccc;
+	width:270px;
+	font-family: 'Roboto Condensed', sans-serif;
+}
+
+.image-container {
+	display: flex;
+	flex-direction: row;
+}
+
+.title-form {
+	margin-bottom:0;
+	font-size:24px;
+}
+
+.label-form {
+	margin-top:10px;
+}
+
+.btn-form {
+	margin-top:20px;
+	width:100%;
+	height:50px;
+}
+
+.hotel-price {
+	font-size: 32px;
+	font-weight: 600;
+	color:white;
+}
+
+.hotel-price-add {
+	margin-top: 20px;
+	font-size:22px;
 }
