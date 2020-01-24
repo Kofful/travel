@@ -5,7 +5,12 @@ if(isset($_SESSION['permit'])) {
 }
 $login = login();
 if(!isset($login['message'])) {
-	echo "<form action='index.php?page=login' method='post' style='box-shadow:0 0 4px 4px rgba(0,0,0,0.1); padding:20px; margin-top:20px;'>
+	echo "<form action='index.php?page=login' method='post' style='box-shadow:0 0 4px 4px rgba(0,0,0,0.1); padding:20px; margin-top:20px;width:500px;height:250px;background-color:white;	
+  top:0;
+  bottom:0;
+  left:0;
+  right:0;
+  margin:auto;'>
 	<div class='form-group'>
 	<label for='inputLogin'>Логин</label>
 	<input type='text' class='form-control' id='inputLogin' name='login' value='".$login['login']."'>

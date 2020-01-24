@@ -321,6 +321,7 @@ function getHotels($state = 0, $country = 0, $hot = 0) {
 			if($hot == 1) {
 				$query.= " WHERE is_hot = 1";
 			}
+			$query.= " ORDER BY RAND()";
 			$result = mysqli_query($link, $query);
 			if(!mysqli_query($link, $query)) {
 				echo "No connection " . mysqli_connect_error();
@@ -332,6 +333,7 @@ function getHotels($state = 0, $country = 0, $hot = 0) {
 			if($hot == 1) {
 				$query.= " AND is_hot = 1";
 			}
+			$query.= " ORDER BY RAND()";
 			$result = mysqli_query($link, $query);
 			if(!mysqli_query($link, $query)) {
 				echo "No connection " . mysqli_error($link);
@@ -343,6 +345,7 @@ function getHotels($state = 0, $country = 0, $hot = 0) {
 			if($hot == 1) {
 				$query.= " AND is_hot = 1";
 			}
+			$query.= " ORDER BY RAND()";
 			$result = mysqli_query($link, $query);
 			if(!mysqli_query($link, $query)) {
 				echo "No connection " . mysqli_connect_error();

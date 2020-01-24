@@ -1,8 +1,8 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light" role="group" aria-label="Basic example" style="width:100%;box-shadow:0 0 2px 2px rgba(0,0,0,0.1);">
 	<ul class="navbar-nav mr-auto" id="navbar">
-		<li class="nav-item"><a type="button" class="nav-link" href="/">Главная</a></li>
-		<li class="nav-item"><a type="button" class="nav-link" href="index.php?page=searchtour">Поиск туров</a></li>
-		<li class="nav-item"><a type="button" class="nav-link" href="index.php?page=hottour">Горящие туры</a></li>
+		<li class="nav-item"><a type="button" class="nav-link <?php if(!isset($_GET['page'])){echo 'active';}?>" href="/">Главная</a></li>
+		<li class="nav-item"><a type="button" class="nav-link <?php if($_GET['page']=="searchtour"){echo 'active';}?>" href="index.php?page=searchtour">Поиск туров</a></li>
+		<li class="nav-item"><a type="button" class="nav-link <?php if($_GET['page']=="hottour"){echo 'active';}?>" href="index.php?page=hottour">Горящие туры</a></li>
 	</ul>
 	<?php
 	if(!isset($_SESSION['permit'])) {

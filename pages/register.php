@@ -5,7 +5,12 @@ if(isset($_SESSION['permit'])) {
 }
 $register = register();
 if($register != "success") {
-	echo "<form action='index.php?page=register' method='post' style='box-shadow:0 0 4px 4px rgba(0,0,0,0.1); padding:20px; margin-top:20px;'>
+	echo "<form action='index.php?page=register' method='post' style='box-shadow:0 0 4px 4px rgba(0,0,0,0.1); padding:20px; margin-top:20px;width:500px;height:450px;background-color:white;
+  top:0;
+  bottom:0;
+  left:0;
+  right:0;
+  margin:auto;'>
 	<div class='form-group'>
 	<label for='inputLogin'>Логин</label>
 	<input type='text' class='form-control' id='inputLogin' name='login' value='".$register['login']."'>

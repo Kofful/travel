@@ -4,15 +4,16 @@ if($_SESSION['permit'] != 'admin') {
 	exit();
 }
 ?>
-<form action="index.php?page=admin" method="post" style="box-shadow:0 0 2px 2px rgba(0,0,0,0.1); margin: 10px; padding: 10px;">
+<form action="index.php?page=admin" method="post" style="background-color:white;box-shadow:0 0 2px 2px rgba(0,0,0,0.1); margin: 10px; padding: 10px;">
 	<label>Добавить страну:</label><br>
 	<input type="text" name="country"><br>
 	<button type="submit" class="btn btn-primary" name="btn_country">Добавить</button>
 </form>
 
-<form action="index.php?page=admin" method="post" style="box-shadow:0 0 2px 2px rgba(0,0,0,0.1); margin:10px; padding:10px;">
+<form action="index.php?page=admin" method="post" style="background-color:white;box-shadow:0 0 2px 2px rgba(0,0,0,0.1); margin:10px; padding:10px;">
 	<label>Страна</label> 
 	<select name="country"> 
+		<option value='0'>Выбрать страну</option>;
 		<?php
 		$countries = getCountries();
 		while($row = mysqli_fetch_array($countries)) {
@@ -26,14 +27,14 @@ if($_SESSION['permit'] != 'admin') {
 	<button type="submit" class="btn btn-primary" name="btn_state">Добавить</button>
 </form>
 
-<form enctype="multipart/form-data" action="index.php?page=admin" method="post" style="box-shadow:0 0 2px 2px rgba(0,0,0,0.1); margin:10px; padding:10px;">
+<form enctype="multipart/form-data" action="index.php?page=admin" method="post" style="background-color:white;box-shadow:0 0 2px 2px rgba(0,0,0,0.1); margin:10px; padding:10px;">
 
 	<label>Страна</label> 
 	<script>
 		function onChangeCountry(country) {
 			$.post('functions.php', { get_states: 0,country: country.value }, function(data){
 				let states = $('#states')[0].options;
-				for (i = states.length; i > -1; i--) {
+				for (i = states.length; i > 0; i--) {
 					states[i] = null;
 				}
 				data = JSON.parse(data);
@@ -45,6 +46,7 @@ if($_SESSION['permit'] != 'admin') {
 		}
 	</script>
 	<select id='countries' name="country" onchange="onChangeCountry(this)"> 
+		<option value='0'>Выбрать страну</option>;
 		<?php
 		$countries = getCountries();
 		while($row = mysqli_fetch_array($countries)) {
@@ -54,6 +56,7 @@ if($_SESSION['permit'] != 'admin') {
 	</select><br>
 	<label>Город</label>
 	<select id="states" name="state">
+		<option value='0'>Выбрать город</option>;
 		<?php
 		if(isset($_POST['states'])) {
 			while($row = mysqli_fetch_array($_POST['states'])) {
@@ -72,14 +75,14 @@ if($_SESSION['permit'] != 'admin') {
 	<button type="submit" class="btn btn-primary" name="btn_hotel">Добавить</button>
 </form>
 
-<form action="index.php?page=admin" method="post" style="box-shadow:0 0 2px 2px rgba(0,0,0,0.1); margin:10px; padding:10px;">
+<form action="index.php?page=admin" method="post" style="background-color:white;box-shadow:0 0 2px 2px rgba(0,0,0,0.1); margin:10px; padding:10px;">
 	<label>Удалить отель:</label><br>
 	<label>Страна</label> 
 	<script>
 		function onChangeCountry1(country) {
 			$.post('functions.php', { get_states: 0,country: country.value }, function(data){
 				let states = $('#states2')[0].options;
-				for (i = states.length; i > -1; i--) {
+				for (i = states.length; i > 0; i--) {
 					states[i] = null;
 				}
 				data = JSON.parse(data);
@@ -91,6 +94,7 @@ if($_SESSION['permit'] != 'admin') {
 		}
 	</script>
 	<select id='countries1' name="country" onchange="onChangeCountry1(this)"> 
+		<option value='0'>Выбрать страну</option>;
 		<?php
 		$countries = getCountries();
 		while($row = mysqli_fetch_array($countries)) {
@@ -103,7 +107,7 @@ if($_SESSION['permit'] != 'admin') {
 		function onChangeState(state) {
 			$.post('functions.php', { get_hotels: 0,state: state.value, country:$('#countries')[0]['value'] }, function(data){
 				let hotels = $('#hotels')[0].options;
-				for (i = hotels.length; i > -1; i--) {
+				for (i = hotels.length; i > 0; i--) {
 					hotels[i] = null;
 				}
 				data = JSON.parse(data);
@@ -116,6 +120,7 @@ if($_SESSION['permit'] != 'admin') {
 		}
 	</script>
 	<select id="states2" name="state" onchange="onChangeState(this)">
+		<option value='0'>Выбрать город</option>;
 		<?php
 		if(isset($_POST['states1'])) {
 			while($row = mysqli_fetch_array($_POST['states1'])) {

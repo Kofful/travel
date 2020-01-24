@@ -1,6 +1,5 @@
 <?php 
 $hotel = getHotelInfo($_GET['id']);
-
 ?>
 <div>
 	<p class='hotel-title'><?php echo $hotel['hotel'];?></p>
@@ -29,12 +28,12 @@ $hotel = getHotelInfo($_GET['id']);
 			</a>
 		</div>
 
-		<form action="#" class='right-form'>
+		<form action="index.php?page=apply&id=<?php echo $hotel['id']?>" class='right-form' method="post">
 			<p class='title-form'>Оставить заявку</p>
 			<label class='label-form'>Имя</label>
-			<input class='form-control' type='text' required>
+			<input class='form-control' placeholder="Введите имя" type='text' required>
 			<label class='label-form'>Телефон</label>
-			<input class='form-control' type='tel' pattern="[\+]38\s[\(]\d{3}[\)]\s\d{3}[\-]\d{2}[\-]\d{2}" minlength="19" maxlength="19" required>
+			<input class='form-control' type='tel' placeholder="Пример: 0660006600" pattern="\d{10}" minlength="10" maxlength="10" required>
 			<button class='btn btn-warning btn-form'>Отправить</button>
 			<p class="hotel-price-add"><span class='hotel-price'><? echo $hotel['price'] . " грн "?></span> с человека за ночь.</p>
 		</form>
