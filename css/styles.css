@@ -185,3 +185,12 @@ p {
 	width:100%;
 	font-size:28px;
 }
+
+.button-more {
+	font-size: 25px;
+	cursor: pointer;
+	text-align: center;
+	width: 200px;
+	border-radius: 5px;
+	margin-top: 10px;
+}
