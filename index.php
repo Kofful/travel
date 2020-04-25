@@ -33,7 +33,6 @@ session_start();
 				if($_SERVER['REQUEST_URI']=="/") {include_once("pages/main.php");} else
 				if(isset($_GET['page'])) {$page=$_GET['page'];
 				if($page=="searchtour") {include_once("pages/searchtour.php");} else
-				if($page=="hottour") {include_once("pages/hottour.php");} else
 				if($page=="admin"){include_once("pages/admin.php");} else
 				if($page=="login"){include_once("pages/login.php");} else
 				if($page=="register"){include_once("pages/register.php");} else
@@ -60,7 +59,7 @@ session_start();
 			<div>
 				<a style="margin-left: 30px; color:rgba(0,0,0,0.8); margin-top: 10px;" href="/">Главная</a><br>
 				<a style="margin-left: 30px; color:rgba(0,0,0,0.8); " href="/index.php?page=searchtour">Поиск туров</a><br>
-				<a style="margin-left: 30px; color:rgba(0,0,0,0.8); " href="/index.php?page=hottour">Горящие туры</a><br>
+				<a style="margin-left: 30px; color:rgba(0,0,0,0.8); " href="/index.php?page=searchtour&hot=1">Горящие туры</a><br>
 			</div>
 		</footer>
 	</div>

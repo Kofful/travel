@@ -21,7 +21,7 @@ function showHotel($hotel) {
 		}
 		?>
 	</div>
-	<div style="display:flex;justify-content: center;margin:10px;"><a class="btn btn-outline-warning btn-main" href="/index.php?page=hottour">Смотреть все</a></div>
+	<div style="display:flex;justify-content: center;margin:10px;"><a class="btn btn-outline-warning btn-main" href="/index.php?page=searchtour&hot=1">Смотреть все</a></div>
 </div>
 
 <p class="title-hot">Популярно сегодня</p>

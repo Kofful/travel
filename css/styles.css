@@ -38,6 +38,7 @@ p {
 	font-weight: 400;
 	text-align: right;
 	font-family: 'Roboto Condensed', sans-serif;
+	align-self: flex-end;
 }
 
 .hotel-title {
@@ -193,4 +194,25 @@ p {
 	width: 200px;
 	border-radius: 5px;
 	margin-top: 10px;
+}
+
+.info-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+.nutrition-container {
+	display: flex;
+	width: 135px;
+	align-items: center;
+}
+
+.info-nutrition {
+	font-size: 14px;
+}
+
+.image-nutrition {
+	width: 30px;
+	height: 30px;
+	margin-right: 5px;
 }
