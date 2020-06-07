@@ -335,8 +335,9 @@ function getStates($index)
     mysqli_close($link);
 }
 
+
 //получение отелей с выборкой
-function getHotels($state = 0, $country = 0, $hot = 0, $nutrition = 0, $page = 0)//page ВСЕГДА ПОСЛЕДНИЙ!!!!!
+function getHotels($state = 0, $country = 0, $hot = 0, $nutrition = 0, $page = 0)//page ВСЕГДА ПОСЛЕДНИЙ ПАРАМЕТР!!!!!
 {
     $page *= 10;
     $link = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
@@ -359,6 +360,9 @@ function getHotels($state = 0, $country = 0, $hot = 0, $nutrition = 0, $page = 0
         if ($nutrition != 0) {//питание
             $query .= " AND nutrition_id = " . $nutrition;
         }
+//        if($roomtype != 0) {//тип номера
+//            //$query .=
+//        }
         $query .= " ORDER BY id DESC LIMIT $page, 10";
         $result = mysqli_query($link, $query);
         if (!mysqli_query($link, $query)) {
@@ -375,22 +379,49 @@ function getMainHotels($hot)
 {
     $link = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
     if (!$link) {
-        echo "No connection<br>" . mysqli_connect_error();
         exit();
     } else {
-        $query = "SELECT `hotels`.hotel, `hotels`.id, `hotels`.price, `states`.state, `countries`.country FROM `hotels` JOIN `states` ON `states`.id = `hotels`.state_id JOIN `countries` ON `countries`.id = `states`.country_id";
-        if ($hot == 1) {
-            $query .= " WHERE is_hot = 1";
+        $final = array();
+        $i = 0;
+        while($i < 4) {
+            $nights = rand(3, 8);
+            $dispatch1 = time();
+            $dispatch1 = strtotime("+" . rand(5, 30) . " day", $dispatch1);
+            $dispatch2 = strtotime("+$nights day", $dispatch1);
+            $query = "SELECT `rooms`.id, `rooms`.`hotel_id`, `rooms`.places,
+ (`rooms`.price * {$nights}) as room_price, IFNULL(SUM(`transfers`.price), 0) AS transfer_price, `hotels`.`hotel`,
+  `states`.state, `countries`.`country`, `photos`.`path` FROM `rooms` JOIN `hotels` ON `hotels`.id = hotel_id JOIN `states`
+   ON `states`.id = `hotels`.`state_id` JOIN `countries` ON `countries`.id = `states`.`country_id` JOIN `photos`
+    ON `photos`.id = (SELECT id FROM `photos` WHERE `hotel_id` = `hotels`.id LIMIT 1) LEFT JOIN `transfers`
+     ON (`transfers`.`state1_id` = 15 AND `transfers`.state2_id = `states`.id AND `transfers`.`dispatch` = '" . date("Y-m-d", $dispatch1) . "')
+      OR (`transfers`.`state1_id` = `states`.id AND `transfers`.state2_id = 15 AND `transfers`.`dispatch` = '" . date("Y-m-d", $dispatch2) . "')";
+            if ($hot == 1) {
+                $query .= " WHERE is_hot = 1";
+            }
+            $query .= " GROUP BY id ORDER BY RAND()";
+            $result = mysqli_query($link, $query);
+            if (!mysqli_query($link, $query)) {
+                exit();
+            }
+            while (($room = mysqli_fetch_array($result))) {
+                $flag = true;
+                foreach ($final as $item) {
+                    if ($item['hotel_id'] == $room['hotel_id']) {
+                        $flag = false;
+                        break;
+                    }
+                }
+                if ($flag) {
+                    $final[$i] = $room;
+                    $final[$i]['nights'] = $nights;
+                    $i++;
+                    break;
+                }
+            }
         }
-        $query .= " ORDER BY RAND() LIMIT 4";
-        $result = mysqli_query($link, $query);
-        if (!mysqli_query($link, $query)) {
-            echo "No connection " . mysqli_connect_error();
-            exit();
-        }
-        return $result;
+        mysqli_close($link);
+        return $final;
     }
-    mysqli_close($link);
 }
 
 //получить фотографии отеля
@@ -407,9 +438,9 @@ function getPhotos($hotel)
             echo "No connection " . mysqli_connect_error();
             exit();
         }
+        mysqli_close($link);
         return $result;
     }
-    mysqli_close($link);
 }
 
 //получить информацию об отеле
@@ -440,6 +471,43 @@ function getHotelInfo($id)
             $i++;
         }
         return $hotel;
+    }
+}
+
+//TODO delete this
+function addTransfers($state1 = 16, $state2 = 20)
+{
+    $link = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+    $i = 0;
+    $date = strtotime("2020/06/06");
+    while ($i < 100) {
+        $date = strtotime("+1 day", $date);
+        $query = "INSERT INTO `transfers` (state1_id, state2_id, price, dispatch) VALUE (" . $state1 . ", " . $state2 . ", " . rand(40, 60) * 100 . ", " . date("Ymd", $date) . " )";
+        $i++;
+        mysqli_query($link, $query);
+    }
+
+    $i = 0;
+    $date = strtotime("2020/06/06");
+    while ($i < 100) {
+        $date = strtotime("+1 day", $date);
+        $query = "INSERT INTO `transfers` (state1_id, state2_id, price, dispatch) VALUE (" . $state2 . ", " . $state1 . ", " . rand(40, 60) * 100 . ", " . date("Ymd", $date) . " )";
+        $i++;
+        mysqli_query($link, $query);
+    }
+}
+
+function addRooms()
+{
+    $link = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+    $result = mysqli_query($link, "SELECT id FROM `hotels` WHERE 1");
+    while ($hotel_id = mysqli_fetch_array($result)) {
+        $type = rand(1, 6);
+        $price = rand(20, 40) * 50;
+        $places = rand(2, 4);
+        $query = "INSERT INTO `rooms` (hotel_id, type_id, price, places) VALUE (" . $hotel_id[0] . ", " . $type . ", " . $price . ", " . $places . ")";
+        mysqli_query($link, $query);
+        mysqli_query($link, $query);
     }
 }
 
