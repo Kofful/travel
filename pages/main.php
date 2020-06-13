@@ -15,7 +15,6 @@ function showHotel($hotel) {//id - ID номера, hotel_id - ID отеля
         //TODO show info about nights, dates, places
 		//получить горящие туры
 		$hotels = getMainHotels(1);
-		print_r($hotels);
         foreach ($hotels as $row) {
             showHotel($row);
         }

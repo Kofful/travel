@@ -1,4 +1,5 @@
 <?php
+error_reporting(0);
 define("DB_HOST", "localhost");
 define("DB_USER", "root");
 define("DB_PASSWORD", "12345");
@@ -181,11 +182,12 @@ if (isset($_POST['get_states'])) {
 
 //получить отели jquery
 if (isset($_POST['get_hotels'])) {
+    $request = array();
     if (isset($_POST['state'])) {
-        $index = $_POST['state'];
+        $request['state'] = $_POST['state'];
     }
     if (isset($_POST['country'])) {
-        $country = $_POST['country'];
+        $request['country'] = $_POST['country'];
     }
     if (isset($_POST['hot'])) {
         $hot = $_POST['hot'];
@@ -194,17 +196,35 @@ if (isset($_POST['get_hotels'])) {
         $page = $_POST['page'];
     }
     if (isset($_POST['nutrition'])) {
-        $nutrition = $_POST['nutrition'];
+        $request['nutrition'] = $_POST['nutrition'];
     }
-    $hotels = getHotels($index, $country, $hot, $nutrition, $page);
+    if (isset($_POST['room_type'])) {
+        $request['room-type'] = $_POST['room_type'];
+    }
+    if (isset($_POST['adults'])) {
+        $request['adults'] = $_POST['adults'];
+    }
+    if (isset($_POST['children'])) {
+        $request['children'] = $_POST['children'];
+        $request['child-ages'] = $_POST['child_ages'];
+    }
+//    if (isset($_POST['nights'])) {
+//        $request['nights'] = $_POST['nights'];
+//    }
+//    if (isset($_POST['dispatch'])) {
+//        $request['dispatch'] = $_POST['dispatch'];
+//    }
+//    if (isset($_POST['min_price'])) {
+//        $request['min-price'] = $_POST['min_price'];
+//    }
+//    if (isset($_POST['max_price'])) {
+//        $request['max-price'] = $_POST['max_price'];
+//    }
+    $hotels = getHotels($request, $hot, $page);
     $resut = array();
     $i = 0;
     while ($row = mysqli_fetch_array($hotels)) {
-        $photos = getPhotos($row['id']);
         $result[$i] = $row;
-        if ($photo = mysqli_fetch_array($photos)) {
-            $result[$i]['photo-path'] = $photo["path"];
-        }
         $i++;
     }
     echo json_encode($result);
@@ -337,7 +357,7 @@ function getStates($index)
 
 
 //получение отелей с выборкой
-function getHotels($state = 0, $country = 0, $hot = 0, $nutrition = 0, $page = 0)//page ВСЕГДА ПОСЛЕДНИЙ ПАРАМЕТР!!!!!
+function getHotels($request = 0, $hot = 0, $page = 0)//page ВСЕГДА ПОСЛЕДНИЙ ПАРАМЕТР!!!!!
 {
     $page *= 10;
     $link = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
@@ -345,25 +365,69 @@ function getHotels($state = 0, $country = 0, $hot = 0, $nutrition = 0, $page = 0
         echo "No connection<br>" . mysqli_connect_error();
         exit();
     } else {
+        //TODO add query min age
         //выбрать все
-        $query = "SELECT `hotels`.id,`hotels`.hotel,`hotels`.`price`,`hotels`.`description`, `nutrition`.`name` as nutrition FROM `hotels` JOIN `nutrition` on `nutrition`.id = `hotels`.`nutrition_id` WHERE";
-        if ($country == 0) {
-            $query .= " state_id > 0";// всегда верно
-        } else if ($state == 0) {//выбрать по стране
-            $query .= " state_id IN (SELECT id FROM `states` WHERE country_id = $country)";
-        } else {//выбрать по городу
-            $query .= " state_id = $state";
+        $nights = isset($request["nights"]) ? $request["nights"] : 5;
+        $dispatch1 = isset($request["dispatch"]) ? strtotime($request["dispatch"]) : strtotime("2020-07-12");
+        $dispatch2 = strtotime("+$nights day", $dispatch1);
+        $dispatch1 = date("Y-m-d", $dispatch1);
+        $dispatch2 = date("Y-m-d", $dispatch2);
+        $places = 0;
+        $multiplier = 1;
+        if(isset($request["children"]) && $request["children"] > 0) {
+            $adults = $request["adults"];
+            $places += $adults;
+            $half = 0;
+            foreach ($request["child-ages"] as $childage) {
+                if($childage > 1) {
+                    $places++;
+                    if($childage < 12) {
+                        $half++;
+                    } else {
+                        $adults++;
+                    }
+                }
+            }
+            $multiplier = ($half * 0.5 + $adults) / $places;
+        } else {
+            $places = $request["adults"];
         }
-        if ($hot == 1) {//горящие
-            $query .= " AND is_hot = 1";
+        $query = "SELECT * FROM (SELECT `rooms`.id, `rooms`.`hotel_id`, `room-types`.`type` AS room_type,
+ `rooms`.places, (`rooms`.price * {$nights} * {$multiplier}+ IFNULL(SUM(`transfers`.price), 0)) AS price,
+  `hotels`.`hotel`, `hotels`.`description`,  `nutrition`.`name` AS nutrition, `states`.state, `countries`.`country`,
+   `photos`.`path` FROM `rooms` JOIN `hotels` ON `hotels`.id = hotel_id JOIN `states` ON `states`.id = `hotels`.`state_id`
+    JOIN `countries` ON `countries`.id = `states`.`country_id` JOIN `photos`
+     ON `photos`.id = (SELECT id FROM `photos` WHERE `hotel_id` = `hotels`.id LIMIT 1) LEFT JOIN `transfers`
+     ON (`transfers`.`state1_id` = 15 AND `transfers`.state2_id = `states`.id AND `transfers`.`dispatch` = '{$dispatch1}')
+     OR (`transfers`.`state1_id` = `states`.id AND `transfers`.state2_id = 15 AND `transfers`.`dispatch` = '{$dispatch2}')
+     LEFT JOIN `nutrition` ON `nutrition`.`id` = `hotels`.`nutrition_id` JOIN `room-types` ON `room-types`.`id` = `rooms`.`type_id`
+     WHERE";
+        if ($hot == 1) {
+            $query .= " is_hot = 1";
+        } else {
+            $query .= " is_hot < 2";//всегда верно
         }
-        if ($nutrition != 0) {//питание
-            $query .= " AND nutrition_id = " . $nutrition;
+        if(isset($request["country"]) && $request["country"] != 0) {
+            $query .= " AND `countries`.`id` = {$request["country"]}";
         }
-//        if($roomtype != 0) {//тип номера
-//            //$query .=
-//        }
-        $query .= " ORDER BY id DESC LIMIT $page, 10";
+        if(isset($request["state"]) && $request["state"] != 0) {
+            $query .= " AND `states`.`id` = {$request["state"]}";
+        }
+        if(isset($request["nutrition"]) && $request["nutrition"] != 0) {
+            $query .= " AND `nutrition_id` = {$request["nutrition"]}";
+        }
+        if(isset($request["room-type"]) && $request["room-type"] != 0) {
+            $query .= " AND `room-types`.`id` = {$request["room-type"]}";
+        }
+        $query .= " AND `rooms`.`places` = {$places}";
+        if(isset($request["min-price"]) && $request["min-price"] != 0) {
+            $query .= " AND (`rooms`.price * 5 + IFNULL(`transfers`.price, 0 )) > {$request["min-price"]}";
+        }
+        if(isset($request["max-price"]) && $request["max-price"] != 0) {
+            $query .= " AND (`rooms`.price * 5 + IFNULL(`transfers`.price, 0 )) < {$request["max-price"]}";
+        }
+        $query .= " GROUP BY id) AS temp GROUP BY hotel_id ORDER BY id DESC LIMIT $page, 10";
+        //echo $query;
         $result = mysqli_query($link, $query);
         if (!mysqli_query($link, $query)) {
             echo "No connection " . mysqli_connect_error();
@@ -414,6 +478,7 @@ function getMainHotels($hot)
                 if ($flag) {
                     $final[$i] = $room;
                     $final[$i]['nights'] = $nights;
+                    $final[$i]['dispatch'] = date("d.m.Y", $dispatch1);
                     $i++;
                     break;
                 }
