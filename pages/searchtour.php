@@ -299,7 +299,7 @@
                         hotels.append("<div class='list-item'>\n" +
                             "<img src='../images/uploads/" + hotel["path"] + "' style='min-width:200px;width:200px;height:133px;align-self:center'>" +
                             "<div style='margin-left:10px;margin-top:5px;margin-right:10px; width:100%;'>" +
-                            "<a href='/index.php?page=hotel&id=" + hotel['id'] + "' class='title'>" + hotel['hotel'] + "</a>\n" +
+                            "<a href='/index.php?page=hotel&id=" + hotel['hotel_id'] + "' class='title'>" + hotel['hotel'] + "</a>\n" +
                             "<p class='description'>" + (hotel['description'].length > 300 ? (hotel['description'].substring(0, 300) + "...") : hotel['description']) + "</p>\n" +
                             "<div class='info-container'><div class='nutrition-container'><img class='image-nutrition' src='../images/nutrition.png'><p class='info-nutrition'>" + hotel['nutrition'] + "</p></div><p class='price'>" + Math.round(hotel['price']) + " грн</p></div>" +
                             "</div>" +
@@ -328,7 +328,6 @@ if (isset($_GET['children'])) {
 }
 $request['dispatch'] = $_GET['dispatch'];
 $request['nights'] = $_GET['nights'];
-print_r($request);
 $hotels = getHotels($request, $_GET['hot']);
 $result = array();
 $i = 0;
@@ -350,7 +349,7 @@ function showHotel($hotel)
     echo "<div class='list-item'>
 	<img src='../images/uploads/" . $hotel['path'] . "' style='min-width:200px;width:200px;height:133px;align-self:center'>
 	<div style='margin-left:10px;margin-top:5px;margin-right:10px; width:100%;'>
-	<a href='/index.php?page=hotel&id=" . $hotel['id'] . "' class='title'>" . $hotel['hotel'] . "</a>
+	<a href='/index.php?page=hotel&id=" . $hotel['hotel_id'] . "' class='title'>" . $hotel['hotel'] . "</a>
 	<p class='description'>" . (mb_strlen($hotel['description']) > 300 ? (mb_substr($hotel['description'], 0, 300, 'UTF-8') . "...") : $hotel['description']) . "</p>
 	<div class='info-container'><div class='nutrition-container'><img class='image-nutrition' src='../images/nutrition.png'><p class='info-nutrition'>" . $hotel['nutrition'] . "</p></div><p class='price'>" . round($hotel['price']) . " грн</p></div>
 	</div>

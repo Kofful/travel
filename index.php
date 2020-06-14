@@ -13,6 +13,7 @@ session_start();
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 	<link rel="stylesheet" href="../css/styles.css">
 	<link href="https://fonts.googleapis.com/css?family=Roboto+Condensed&display=swap" rel="stylesheet">
+    <script src="/ckeditor/ckeditor.js"></script>
 	<title>Mandrivka</title>
 </head>
 <body>
@@ -53,7 +54,7 @@ session_start();
 		</section>
 	</div>
 </div>
-<div class="col-md-12 col-lg-12 d-xs-none" style='display:flex; height: 150px; width:100%;background-color: #aaa;margin-top: 50px;padding: 10px 0 0 0;'>
+<div class="col-md-12 col-lg-12 d-xs-none" style='display:flex; height: 250px; width:100%;background-color: #aaa;margin-top: 50px;padding: 10px 0 0 0;'>
 	<div class="col-sm-4 col-md-4 col-lg-4" >
 		<footer >
 			<div>

@@ -39,5 +39,5 @@ $hotel = getHotelInfo($_GET['id']);
 		</form>
 	</div>
 	<p class='hotel-description-title'>Описание отеля <?php echo $hotel['hotel'];?></p>
-	<p class='hotel-description'><?php echo nl2br($hotel['description'])?></p>
+	<div class='hotel-description'><?php echo nl2br($hotel['description'])?></div>
 </div>

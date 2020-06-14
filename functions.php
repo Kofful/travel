@@ -126,6 +126,7 @@ if (isset($_POST['btn_hotel'])) {
                 move_uploaded_file($_FILES['image']['tmp_name'][$i], $uploadfile);
             }
             $id = mysqli_insert_id($link);
+            $id = 58;//TODO delete
             $query = "INSERT INTO `photos` (id, path, hotel_id) VALUES ";
             for ($i = 0; $i < $total; $i++) {
                 $query .= "('', '$files[$i]', $id)";
@@ -365,7 +366,6 @@ function getHotels($request = 0, $hot = 0, $page = 0)//page ВСЕГДА ПОС�
         echo "No connection<br>" . mysqli_connect_error();
         exit();
     } else {
-        //TODO add query min age
         //выбрать все
         $nights = isset($request["nights"]) ? $request["nights"] : 5;
         $dispatch1 = isset($request["dispatch"]) ? strtotime($request["dispatch"]) : strtotime("2020-07-12");
@@ -373,6 +373,7 @@ function getHotels($request = 0, $hot = 0, $page = 0)//page ВСЕГДА ПОС�
         $dispatch1 = date("Y-m-d", $dispatch1);
         $dispatch2 = date("Y-m-d", $dispatch2);
         $places = 0;
+        $min_age = 18;
         $multiplier = 1;
         if(isset($request["children"]) && $request["children"] > 0) {
             $adults = $request["adults"];
@@ -386,6 +387,9 @@ function getHotels($request = 0, $hot = 0, $page = 0)//page ВСЕГДА ПОС�
                     } else {
                         $adults++;
                     }
+                }
+                if($childage < $min_age) {
+                    $min_age=$childage;
                 }
             }
             $multiplier = ($half * 0.5 + $adults) / $places;
@@ -420,6 +424,7 @@ function getHotels($request = 0, $hot = 0, $page = 0)//page ВСЕГДА ПОС�
             $query .= " AND `room-types`.`id` = {$request["room-type"]}";
         }
         $query .= " AND `rooms`.`places` = {$places}";
+        $query .= " AND `hotels`.`min_age` <= {$min_age}";
         if(isset($request["min-price"]) && $request["min-price"] != 0) {
             $query .= " AND (`rooms`.price * 5 + IFNULL(`transfers`.price, 0 )) > {$request["min-price"]}";
         }
@@ -430,7 +435,6 @@ function getHotels($request = 0, $hot = 0, $page = 0)//page ВСЕГДА ПОС�
         //echo $query;
         $result = mysqli_query($link, $query);
         if (!mysqli_query($link, $query)) {
-            echo "No connection " . mysqli_connect_error();
             exit();
         }
         return $result;
@@ -494,13 +498,11 @@ function getPhotos($hotel)
 {
     $link = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
     if (!$link) {
-        echo "No connection<br>" . mysqli_connect_error();
         exit();
     } else {
         $query = "SELECT * FROM `photos` WHERE hotel_id = $hotel";
         $result = mysqli_query($link, $query);
         if (!mysqli_query($link, $query)) {
-            echo "No connection " . mysqli_connect_error();
             exit();
         }
         mysqli_close($link);
@@ -513,20 +515,17 @@ function getHotelInfo($id)
 {
     $link = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
     if (!$link) {
-        echo "No connection<br>" . mysqli_connect_error();
         exit();
     } else {
         $query = "SELECT `hotels`.hotel, `hotels`.id, `hotels`.price,`hotels`.description,	 `states`.state, `countries`.country FROM `hotels` JOIN `states` ON `states`.id = `hotels`.state_id JOIN `countries` ON `countries`.id = `states`.country_id WHERE `hotels`.id = $id";
         $result = mysqli_query($link, $query);
         if (!mysqli_query($link, $query)) {
-            echo "No connection " . mysqli_connect_error();
             exit();
         }
         $hotel = mysqli_fetch_array($result);
         $query = "SELECT * FROM `photos` WHERE hotel_id = $id";
         $result = mysqli_query($link, $query);
         if (!mysqli_query($link, $query)) {
-            echo "No connection " . mysqli_connect_error();
             exit();
         }
         $hotel['photos'] = array();
