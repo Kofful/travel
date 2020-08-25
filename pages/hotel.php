@@ -35,7 +35,7 @@ $hotel = getHotelInfo($_GET['id']);
 			<label class='label-form'>Телефон</label>
 			<input class='form-control' type='tel' placeholder="Пример: 0660006600" pattern="\d{10}" minlength="10" maxlength="10" required>
 			<button class='btn btn-warning btn-form'>Отправить</button>
-			<p class="hotel-price-add"><span class='hotel-price'><? echo $hotel['price'] . " грн "?></span> с человека за ночь.</p>
+			<p class="hotel-price-add"><span class='hotel-price'><? echo "1kk" . " грн " //TODO show real price?></span> с человека за ночь.</p>
 		</form>
 	</div>
 	<p class='hotel-description-title'>Описание отеля <?php echo $hotel['hotel'];?></p>

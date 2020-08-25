@@ -89,7 +89,6 @@ if (isset($_POST['btn_state_del'])) {
 if (isset($_POST['btn_hotel'])) {
     $state_id = $_POST['state'];
     $hotel = $_POST['hotel'];
-    $price = $_POST['price'];
     $hot = $_POST['hot'];
     $hot = $hot == "on" ? 1 : 0;
     $description = $_POST['description'];
@@ -100,7 +99,7 @@ if (isset($_POST['btn_hotel'])) {
             echo "No connection1<br>" . mysqli_connect_error();
             exit();
         } else {
-            $query = "INSERT INTO `hotels` (id, hotel, price, description, state_id, is_hot) VALUES ('', '$hotel', '$price', '$description', '$state_id', $hot)";
+            $query = "INSERT INTO `hotels` (id, hotel, description, state_id, is_hot) VALUES ('', '$hotel', '$description', '$state_id', $hot)";
             if (!mysqli_query($link, $query)) {
                 echo "No connection2 " . mysqli_connect_error();
                 exit();
@@ -112,17 +111,6 @@ if (isset($_POST['btn_hotel'])) {
                 $filename = basename(str_replace(" ", "", str_replace(".", "", microtime())) . "." . explode("/", $_FILES['image']['type'][$i])[1]);
                 $files[$i] = $filename;
                 $uploadfile = $uploaddir . $filename;
-                // $file = $_FILES['image']['tmp_name'][$i];
-                // $centreX = round($im->getWidth() / 2);
-                // $centreY = round($im->getHeight() / 2);
-
-                // $x1 = $centreX - 300;
-                // $y1 = $centreY - 200;
-
-                // $x2 = $centreX + 300;
-                // $y2 = $centreY + 200;
-
-                // $im->crop($x1, $y1, $x2, $y2);
                 move_uploaded_file($_FILES['image']['tmp_name'][$i], $uploadfile);
             }
             $id = mysqli_insert_id($link);
@@ -517,7 +505,7 @@ function getHotelInfo($id)
     if (!$link) {
         exit();
     } else {
-        $query = "SELECT `hotels`.hotel, `hotels`.id, `hotels`.price,`hotels`.description,	 `states`.state, `countries`.country FROM `hotels` JOIN `states` ON `states`.id = `hotels`.state_id JOIN `countries` ON `countries`.id = `states`.country_id WHERE `hotels`.id = $id";
+        $query = "SELECT `hotels`.hotel, `hotels`.id, `hotels`.description,	 `states`.state, `countries`.country FROM `hotels` JOIN `states` ON `states`.id = `hotels`.state_id JOIN `countries` ON `countries`.id = `states`.country_id WHERE `hotels`.id = $id";
         $result = mysqli_query($link, $query);
         if (!mysqli_query($link, $query)) {
             exit();
