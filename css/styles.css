@@ -383,8 +383,8 @@ input {
     z-index: -1;
 }
 #upload-images-button {
-    font-size: 1.25em;
-    font-weight: 700;
+    font-size: 1em;
+    font-weight: 500;
     display: inline-block;
     cursor: pointer;
 }
@@ -410,4 +410,19 @@ input {
 
 .admin-container h5, h3 {
     text-align: center;
+}
+
+#adminCarousel {
+    margin: auto;
+}
+
+#admin-add-hotel {
+    display: flex;
+    justify-content: center;
+}
+
+#btn_add-hotel {
+    width: 200px;
+    height: 50px;
+    font-size: 25px;
 }

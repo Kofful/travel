@@ -176,11 +176,7 @@
             </script>
             <div tabindex="0" id="dropdownheads-container" style="margin:10px;display: block;">
                 <button id="dropdownheads-button" type="button" onmousedown="onHeadsDown()" onclick="onHeadsClick()"
-                        class="btn none-outline dropdownheads">Кто поедет
-                    <svg style="float: right; margin-top:7px;" xmlns='http://www.w3.org/2000/svg' width='10' height='10'
-                         viewBox='0 0 4 5'>
-                        <path fill='#343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/>
-                    </svg>
+                        class="btn none-outline dropdownheads custom-select">Кто поедет
                 </button>
                 <div id="dropdownheads">
                     <h6>Взрослые:</h6>
@@ -217,32 +213,74 @@
                             $i = 1;
                             while (isset($_GET['child' . $i])) {
                                 $age = $_GET['child' . $i];
-                                echo "<select class='custom-select none-outline' style='margin: 5px;width: 120px;' name='child" . $i . "' id='child" . $i . "'>" .
-                                    "<option value='0' " . ($age == 0 ? 'selected' : '') . ">до года</option>" .
-                                    "<option value='1' " . ($age == 1 ? 'selected' : '') . ">1 год</option>" .
-                                    "<option value='2' " . ($age == 2 ? 'selected' : '') . ">2 года</option>" .
-                                    "<option value='3' " . ($age == 3 ? 'selected' : '') . ">3 года</option>" .
-                                    "<option value='4' " . ($age == 4 ? 'selected' : '') . ">4 года</option>" .
-                                    "<option value='5' " . ($age == 5 ? 'selected' : '') . ">5 лет</option>" .
-                                    "<option value='6' " . ($age == 6 ? 'selected' : '') . ">6 лет</option>" .
-                                    "<option value='7' " . ($age == 7 ? 'selected' : '') . ">7 лет</option>" .
-                                    "<option value='8' " . ($age == 8 ? 'selected' : '') . ">8 лет</option>" .
-                                    "<option value='9' " . ($age == 9 ? 'selected' : '') . ">9 лет</option>" .
-                                    "<option value='10' " . ($age == 10 ? 'selected' : '') . ">10 лет</option>" .
-                                    "<option value='11' " . ($age == 11 ? 'selected' : '') . ">11 лет</option>" .
-                                    "<option value='12' " . ($age == 12 ? 'selected' : '') . ">12 лет</option>" .
-                                    "<option value='13' " . ($age == 13 ? 'selected' : '') . ">13 лет</option>" .
-                                    "<option value='14' " . ($age == 14 ? 'selected' : '') . ">14 лет</option>" .
-                                    "<option value='15' " . ($age == 15 ? 'selected' : '') . ">15 лет</option>" .
-                                    "<option value='16' " . ($age == 16 ? 'selected' : '') . ">16 лет</option>" .
-                                    "<option value='17' " . ($age == 17 ? 'selected' : '') . ">17 лет</option>" .
-                                    "</select>";
+                                echo "<select class='custom-select none-outline' style='margin: 5px;width: 120px;' name='child" . $i . "' id='child" . $i . "'>";
+                                for ($value = 0; $value < 18; $value++) {
+                                    if ($value == 0) {
+                                        echo "<option value='0' " . ($age == 0 ? 'selected' : '') . ">до года</option>";
+                                    } else if ($value == 1) {
+                                        echo "<option value='1' " . ($age == 1 ? 'selected' : '') . ">1 год</option>";
+                                    } else if ($value > 1 && $value < 5) {
+                                        echo "<option value='$value' " . ($age == $value ? 'selected' : '') . ">$value года</option>";
+                                    } else if ($value > 4) {
+                                        echo "<option value='$value' " . ($age == $value ? 'selected' : '') . ">$value лет</option>";
+                                    }
+                                }
+                                echo "</select>";
                                 $i++;
                             }
                         } ?>
                     </div>
                 </div>
             </div>
+            <input id="daterange" type="text" name="daterange" value="<?echo isset($_GET['daterange']) ? $_GET['daterange'] : (date("Y.m.d") . " - " . date("Y.m.d", strtotime(date("m/d/Y")."+5 days"))) ?>"/>
+            <script>
+                $(function () {
+                    $('input[name="daterange"]').daterangepicker({
+                        opens: 'center',
+                        maxSpan: {
+                            days: 21
+                        },
+                        minDate: moment().format("YYYY.MM.DD"),
+                        showCustomRangeLabel: false,
+                        startOfWeek: 'monday',
+                        locale: {
+                            format: "YYYY.MM.DD",
+                            separator: " - ",
+                            applyLabel: "Подтвердить",
+                            cancelLabel: "Отмена",
+                            fromLabel: "С",
+                            toLabel: "По",
+                            customRangeLabel: "Custom",
+                            weekLabel: "W",
+                            daysOfWeek: [
+                                "Вс",
+                                "Пн",
+                                "Вт",
+                                "Ср",
+                                "Чт",
+                                "Пт",
+                                "Сб",
+                            ],
+                            monthNames: [
+                                "Январь",
+                                "Февраль",
+                                "Март",
+                                "Апрель",
+                                "Май",
+                                "Июнь",
+                                "Июль",
+                                "Август",
+                                "Сентябрь",
+                                "Октябрь",
+                                "Ноябрь",
+                                "Декабрь"
+                            ],
+                            firstDay: 1,
+                        }
+                    }, function (start, end, label) {
+                    });
+                });
+            </script>
         </div>
         <button style='margin:10px;' type="submit" class='btn btn-primary'>Поиск</button>
     </form>
@@ -251,6 +289,7 @@
     <script>
         let page = 1;
 
+        //TODO uncomment texxt in whole script
         function onLoadMore() {
             $("#hotel-container").append("<div id=\"loader\" style=\"display: flex; justify-content: center;\"><div class=\"loader\"></div></div>");
             let country = $("#countries")[0].value;
@@ -259,31 +298,24 @@
             let nutrition = $("#nutrition")[0].value;
             let room_type = $("#room-type")[0].value;
             let adults = $("#adults")[0].value;
-            console.log(adults);
             let children = $("#children")[0].value;
             let child_ages = [];
-            for(let i = 0; i < children; i++) {
+            for (let i = 0; i < children; i++) {
                 child_ages.push($("#child" + (i + 1))[0].value);
             }
-            //let nights = $("#nights")[0].value;
-            //let dispatch = $("#dispatch")[0].value;
-            // let min_price = $("#min-price")[0].value;
-            // let max_price = $("#max_price")[0].value;
+            let daterange = $("#daterange")[0].value;
             $.post('functions.php', {
                 get_hotels: 0,
-                country: country,
-                state: state,
-                hot: hot,
-                nutrition: nutrition,
-                room_type: room_type,
-                adults: adults,
-                children: children,
-                child_ages: child_ages,
-                // nights: nights,
-                // dispatch: dispatch,
-                // min_price: min_price,
-                // max_price: max_price,
-                page: page
+                country,
+                state,
+                hot,
+                nutrition,
+                room_type,
+                adults,
+                children,
+                child_ages,
+                daterange,
+                page
             }, function (data) {
                 page++;
                 data = JSON.parse(data);
@@ -326,8 +358,7 @@ if (isset($_GET['children'])) {
         $request["child-ages"][$i - 1] = $_GET["child{$i}"];
     }
 }
-$request['dispatch'] = $_GET['dispatch'];
-$request['nights'] = $_GET['nights'];
+$request['daterange'] = $_GET['daterange'];
 $hotels = getHotels($request, $_GET['hot']);
 $result = array();
 $i = 0;

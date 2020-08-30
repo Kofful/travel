@@ -92,6 +92,8 @@ if (isset($_POST['btn_hotel'])) {
     $hot = $_POST['hot'];
     $hot = $hot == "on" ? 1 : 0;
     $description = $_POST['description'];
+    $min_age = $_POST['min_age'];
+    $nutrition_id = $_POST['nutrition'];
     $image = $_POST['image'];
     $link = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
     if ($state_id) {
@@ -99,7 +101,7 @@ if (isset($_POST['btn_hotel'])) {
             echo "No connection1<br>" . mysqli_connect_error();
             exit();
         } else {
-            $query = "INSERT INTO `hotels` (id, hotel, description, state_id, is_hot) VALUES ('', '$hotel', '$description', '$state_id', $hot)";
+            $query = "INSERT INTO `hotels` (id, hotel, description, state_id, is_hot, min_age, nutrition_id) VALUES ('', '$hotel', '$description', '$state_id', $hot, $min_age, $nutrition_id)";
             if (!mysqli_query($link, $query)) {
                 echo "No connection2 " . mysqli_connect_error();
                 exit();
@@ -114,7 +116,6 @@ if (isset($_POST['btn_hotel'])) {
                 move_uploaded_file($_FILES['image']['tmp_name'][$i], $uploadfile);
             }
             $id = mysqli_insert_id($link);
-            $id = 58;//TODO delete
             $query = "INSERT INTO `photos` (id, path, hotel_id) VALUES ";
             for ($i = 0; $i < $total; $i++) {
                 $query .= "('', '$files[$i]', $id)";
@@ -197,18 +198,15 @@ if (isset($_POST['get_hotels'])) {
         $request['children'] = $_POST['children'];
         $request['child-ages'] = $_POST['child_ages'];
     }
-//    if (isset($_POST['nights'])) {
-//        $request['nights'] = $_POST['nights'];
-//    }
-//    if (isset($_POST['dispatch'])) {
-//        $request['dispatch'] = $_POST['dispatch'];
-//    }
-//    if (isset($_POST['min_price'])) {
-//        $request['min-price'] = $_POST['min_price'];
-//    }
-//    if (isset($_POST['max_price'])) {
-//        $request['max-price'] = $_POST['max_price'];
-//    }
+    if (isset($_POST['daterange'])) {
+        $request['daterange'] = $_POST['daterange'];
+    }
+    if (isset($_POST['min_price'])) {
+        $request['min-price'] = $_POST['min_price'];
+    }
+    if (isset($_POST['max_price'])) {
+        $request['max-price'] = $_POST['max_price'];
+    }
     $hotels = getHotels($request, $hot, $page);
     $resut = array();
     $i = 0;
@@ -219,7 +217,7 @@ if (isset($_POST['get_hotels'])) {
     echo json_encode($result);
 }
 
-//регистрация
+//регистрация (3 функции)
 function clean($value = "")
 {
     $value = trim($value);
@@ -305,7 +303,6 @@ function login()
     mysqli_close($link);
 }
 
-
 //получение стран
 function getCountries()
 {
@@ -346,6 +343,8 @@ function getStates($index)
 
 
 //получение отелей с выборкой
+//$hot не входит в $request по причине большого количества использований функции getHotels() с разными параметрами
+//TODO check if not reserved
 function getHotels($request = 0, $hot = 0, $page = 0)//page ВСЕГДА ПОСЛЕДНИЙ ПАРАМЕТР!!!!!
 {
     $page *= 10;
@@ -355,11 +354,14 @@ function getHotels($request = 0, $hot = 0, $page = 0)//page ВСЕГДА ПОС�
         exit();
     } else {
         //выбрать все
-        $nights = isset($request["nights"]) ? $request["nights"] : 5;
-        $dispatch1 = isset($request["dispatch"]) ? strtotime($request["dispatch"]) : strtotime("2020-07-12");
-        $dispatch2 = strtotime("+$nights day", $dispatch1);
+        $daterange = isset($request["daterange"]) ? $request["daterange"] : (date("Y.m.d") . " - " . date("Y.m.d", strtotime(date("m/d/Y")."+5 days")));
+        $daterange = explode(" ", str_replace(".", "/", $daterange));
+        $dispatch1 = strtotime($daterange[0]);
+        $dispatch2 = strtotime($daterange[2]);
         $dispatch1 = date("Y-m-d", $dispatch1);
         $dispatch2 = date("Y-m-d", $dispatch2);
+        $interval = date_diff(date_create($dispatch1), date_create($dispatch2));
+        $nights = intval($interval->format("%a"));
         $places = 0;
         $min_age = 18;
         $multiplier = 1;
@@ -389,7 +391,7 @@ function getHotels($request = 0, $hot = 0, $page = 0)//page ВСЕГДА ПОС�
   `hotels`.`hotel`, `hotels`.`description`,  `nutrition`.`name` AS nutrition, `states`.state, `countries`.`country`,
    `photos`.`path` FROM `rooms` JOIN `hotels` ON `hotels`.id = hotel_id JOIN `states` ON `states`.id = `hotels`.`state_id`
     JOIN `countries` ON `countries`.id = `states`.`country_id` JOIN `photos`
-     ON `photos`.id = (SELECT id FROM `photos` WHERE `hotel_id` = `hotels`.id LIMIT 1) LEFT JOIN `transfers`
+     ON `photos`.id = (SELECT id FROM `photos` WHERE `hotel_id` = `hotels`.id LIMIT 1) INNER JOIN `transfers`
      ON (`transfers`.`state1_id` = 15 AND `transfers`.state2_id = `states`.id AND `transfers`.`dispatch` = '{$dispatch1}')
      OR (`transfers`.`state1_id` = `states`.id AND `transfers`.state2_id = 15 AND `transfers`.`dispatch` = '{$dispatch2}')
      LEFT JOIN `nutrition` ON `nutrition`.`id` = `hotels`.`nutrition_id` JOIN `room-types` ON `room-types`.`id` = `rooms`.`type_id`
@@ -420,7 +422,7 @@ function getHotels($request = 0, $hot = 0, $page = 0)//page ВСЕГДА ПОС�
             $query .= " AND (`rooms`.price * 5 + IFNULL(`transfers`.price, 0 )) < {$request["max-price"]}";
         }
         $query .= " GROUP BY id) AS temp GROUP BY hotel_id ORDER BY id DESC LIMIT $page, 10";
-        //echo $query;
+        echo $query;
         $result = mysqli_query($link, $query);
         if (!mysqli_query($link, $query)) {
             exit();
