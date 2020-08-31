@@ -225,6 +225,39 @@ input {
     margin-right: 5px;
 }
 
+.roomtype-container {
+    display: flex;
+    width: 135px;
+    align-items: center;
+}
+
+.info-roomtype {
+    font-size: 14px;
+}
+
+.image-roomtype {
+    width: 30px;
+    height: 30px;
+    margin-right: 5px;
+}
+
+
+.places-container {
+    display: flex;
+    width: 135px;
+    align-items: center;
+}
+
+.info-places {
+    font-size: 16px;
+}
+
+.image-places {
+    width: 30px;
+    height: 30px;
+    margin-right: 5px;
+}
+
 .loader {
     border: 16px solid #f3f3f3;
     border-top: 16px solid #3498db;
@@ -255,10 +288,38 @@ input {
     box-shadow: 2px 2px 4px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
+.form-container {
+    display:flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.form-div {
+    margin: 10px;
+}
+
+.daterange-div {
+    margin: 10px;
+    flex-grow: 1;
+}
+
+.pricerange-div {
+    margin: 10px;
+    flex-grow: 3;
+}
+
+#pricerange {
+    margin: 0 50px 0 10px;
+}
+
 .dropdownheads {
     text-align: left;
     background-color: white;
     width: 200px;
+}
+
+#dropdownheads-container {
+    display: block;
 }
 
 #dropdownheads-container:focus-within #dropdownheads {

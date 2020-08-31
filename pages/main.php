@@ -5,7 +5,7 @@ function showHotel($hotel) {//id - ID номера, hotel_id - ID отеля
 	<img style='min-width:250px;width:250px;height:166px;' src = '../images/uploads/".$hotel['path']."'>
 	<a href='/index.php?page=hotel&id=".$hotel['hotel_id']."&room_id=".$hotel['id']."' class='main-title'>".$hotel['hotel']."</a>
 	<p class='main-location'>".$hotel['country'].", ".$hotel['state']."</p>
-	<p class='main-price'>".($hotel['room_price'] + $hotel['transfer_price'])." грн</p></div>";
+	<p class='main-price'>".$hotel['price']." грн</p></div>";
 }
 ?>
 <div class='main-section'>

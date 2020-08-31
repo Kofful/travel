@@ -201,11 +201,8 @@ if (isset($_POST['get_hotels'])) {
     if (isset($_POST['daterange'])) {
         $request['daterange'] = $_POST['daterange'];
     }
-    if (isset($_POST['min_price'])) {
-        $request['min-price'] = $_POST['min_price'];
-    }
-    if (isset($_POST['max_price'])) {
-        $request['max-price'] = $_POST['max_price'];
+    if (isset($_POST['pricerange'])) {
+        $request['pricerange'] = $_POST['pricerange'];
     }
     $hotels = getHotels($request, $hot, $page);
     $resut = array();
@@ -344,7 +341,7 @@ function getStates($index)
 
 //получение отелей с выборкой
 //$hot не входит в $request по причине большого количества использований функции getHotels() с разными параметрами
-//TODO check if not reserved
+//TODO check reservation at main page too
 function getHotels($request = 0, $hot = 0, $page = 0)//page ВСЕГДА ПОСЛЕДНИЙ ПАРАМЕТР!!!!!
 {
     $page *= 10;
@@ -354,32 +351,39 @@ function getHotels($request = 0, $hot = 0, $page = 0)//page ВСЕГДА ПОС�
         exit();
     } else {
         //выбрать все
-        $daterange = isset($request["daterange"]) ? $request["daterange"] : (date("Y.m.d") . " - " . date("Y.m.d", strtotime(date("m/d/Y")."+5 days")));
+        $daterange = isset($request["daterange"]) ? $request["daterange"] : (date("Y.m.d") . " - " . date("Y.m.d", strtotime(date("m/d/Y") . "+5 days")));
         $daterange = explode(" ", str_replace(".", "/", $daterange));
         $dispatch1 = strtotime($daterange[0]);
         $dispatch2 = strtotime($daterange[2]);
         $dispatch1 = date("Y-m-d", $dispatch1);
         $dispatch2 = date("Y-m-d", $dispatch2);
+        $date_to_check_reservations = date('Y-m-d', strtotime($dispatch2 . ' +1 days'));
         $interval = date_diff(date_create($dispatch1), date_create($dispatch2));
         $nights = intval($interval->format("%a"));
+
+        $pricerange = isset($request["pricerange"]) ? $request["pricerange"] : "0 - 100000";
+        $pricerange = explode(" ", $pricerange);
+        $min_price = intval($pricerange[0]);
+        $max_price = intval($pricerange[2]);
+
         $places = 0;
         $min_age = 18;
         $multiplier = 1;
-        if(isset($request["children"]) && $request["children"] > 0) {
+        if (isset($request["children"]) && $request["children"] > 0) {
             $adults = $request["adults"];
             $places += $adults;
             $half = 0;
             foreach ($request["child-ages"] as $childage) {
-                if($childage > 1) {
+                if ($childage > 1) {
                     $places++;
-                    if($childage < 12) {
+                    if ($childage < 12) {
                         $half++;
                     } else {
                         $adults++;
                     }
                 }
-                if($childage < $min_age) {
-                    $min_age=$childage;
+                if ($childage < $min_age) {
+                    $min_age = $childage;
                 }
             }
             $multiplier = ($half * 0.5 + $adults) / $places;
@@ -387,42 +391,36 @@ function getHotels($request = 0, $hot = 0, $page = 0)//page ВСЕГДА ПОС�
             $places = $request["adults"];
         }
         $query = "SELECT * FROM (SELECT `rooms`.id, `rooms`.`hotel_id`, `room-types`.`type` AS room_type,
- `rooms`.places, (`rooms`.price * {$nights} * {$multiplier}+ IFNULL(SUM(`transfers`.price), 0)) AS price,
+ `rooms`.places, (`rooms`.price * {$nights} * {$multiplier}+ IFNULL(SUM(`transfers`.price), 0)) AS price, COUNT(`transfers`.`id`) as tickets,
   `hotels`.`hotel`, `hotels`.`description`,  `nutrition`.`name` AS nutrition, `states`.state, `countries`.`country`,
    `photos`.`path` FROM `rooms` JOIN `hotels` ON `hotels`.id = hotel_id JOIN `states` ON `states`.id = `hotels`.`state_id`
     JOIN `countries` ON `countries`.id = `states`.`country_id` JOIN `photos`
-     ON `photos`.id = (SELECT id FROM `photos` WHERE `hotel_id` = `hotels`.id LIMIT 1) INNER JOIN `transfers`
+     ON `photos`.id = (SELECT id FROM `photos` WHERE `hotel_id` = `hotels`.id LIMIT 1) LEFT JOIN `transfers`
      ON (`transfers`.`state1_id` = 15 AND `transfers`.state2_id = `states`.id AND `transfers`.`dispatch` = '{$dispatch1}')
      OR (`transfers`.`state1_id` = `states`.id AND `transfers`.state2_id = 15 AND `transfers`.`dispatch` = '{$dispatch2}')
      LEFT JOIN `nutrition` ON `nutrition`.`id` = `hotels`.`nutrition_id` JOIN `room-types` ON `room-types`.`id` = `rooms`.`type_id`
-     WHERE";
+     WHERE (`countries`.`id` = 12 OR `transfers`.`dispatch` = '{$dispatch1}' OR `transfers`.`dispatch` = '{$dispatch2}') 
+     AND (SELECT COUNT(*) FROM `reservations` WHERE `reservations`.`reserved` BETWEEN '{$dispatch1}' AND '{$date_to_check_reservations}' AND `reservations`.`room_id` = `rooms`.`id`) = 0";
         if ($hot == 1) {
-            $query .= " is_hot = 1";
-        } else {
-            $query .= " is_hot < 2";//всегда верно
+            $query .= " AND is_hot = 1";
         }
-        if(isset($request["country"]) && $request["country"] != 0) {
+        if (isset($request["country"]) && $request["country"] != 0) {
             $query .= " AND `countries`.`id` = {$request["country"]}";
         }
-        if(isset($request["state"]) && $request["state"] != 0) {
+        if (isset($request["state"]) && $request["state"] != 0) {
             $query .= " AND `states`.`id` = {$request["state"]}";
         }
-        if(isset($request["nutrition"]) && $request["nutrition"] != 0) {
+        if (isset($request["nutrition"]) && $request["nutrition"] != 0) {
             $query .= " AND `nutrition_id` = {$request["nutrition"]}";
         }
-        if(isset($request["room-type"]) && $request["room-type"] != 0) {
+        if (isset($request["room-type"]) && $request["room-type"] != 0) {
             $query .= " AND `room-types`.`id` = {$request["room-type"]}";
         }
         $query .= " AND `rooms`.`places` = {$places}";
         $query .= " AND `hotels`.`min_age` <= {$min_age}";
-        if(isset($request["min-price"]) && $request["min-price"] != 0) {
-            $query .= " AND (`rooms`.price * 5 + IFNULL(`transfers`.price, 0 )) > {$request["min-price"]}";
-        }
-        if(isset($request["max-price"]) && $request["max-price"] != 0) {
-            $query .= " AND (`rooms`.price * 5 + IFNULL(`transfers`.price, 0 )) < {$request["max-price"]}";
-        }
-        $query .= " GROUP BY id) AS temp GROUP BY hotel_id ORDER BY id DESC LIMIT $page, 10";
-        echo $query;
+
+        $query .= " GROUP BY id) AS temp GROUP BY hotel_id HAVING (tickets = 0 OR tickets = 2) AND price > {$min_price} AND price < {$max_price} ORDER BY id DESC LIMIT $page, 10";
+        //echo $query;
         $result = mysqli_query($link, $query);
         if (!mysqli_query($link, $query)) {
             exit();
@@ -441,22 +439,27 @@ function getMainHotels($hot)
     } else {
         $final = array();
         $i = 0;
-        while($i < 4) {
+        while ($i < 4) {
             $nights = rand(3, 8);
-            $dispatch1 = time();
-            $dispatch1 = strtotime("+" . rand(5, 30) . " day", $dispatch1);
-            $dispatch2 = strtotime("+$nights day", $dispatch1);
-            $query = "SELECT `rooms`.id, `rooms`.`hotel_id`, `rooms`.places,
- (`rooms`.price * {$nights}) as room_price, IFNULL(SUM(`transfers`.price), 0) AS transfer_price, `hotels`.`hotel`,
-  `states`.state, `countries`.`country`, `photos`.`path` FROM `rooms` JOIN `hotels` ON `hotels`.id = hotel_id JOIN `states`
-   ON `states`.id = `hotels`.`state_id` JOIN `countries` ON `countries`.id = `states`.`country_id` JOIN `photos`
-    ON `photos`.id = (SELECT id FROM `photos` WHERE `hotel_id` = `hotels`.id LIMIT 1) LEFT JOIN `transfers`
-     ON (`transfers`.`state1_id` = 15 AND `transfers`.state2_id = `states`.id AND `transfers`.`dispatch` = '" . date("Y-m-d", $dispatch1) . "')
-      OR (`transfers`.`state1_id` = `states`.id AND `transfers`.state2_id = 15 AND `transfers`.`dispatch` = '" . date("Y-m-d", $dispatch2) . "')";
+            $dispatch1 = date("Y-m-d", strtotime("+" . rand(5, 30) . " day", time()));
+            $dispatch2 = date("Y-m-d", strtotime($dispatch1."+$nights days"));
+            $date_to_check_reservations = date('Y-m-d', strtotime($dispatch2 . ' +1 days'));
+            $query = "SELECT * FROM (SELECT `rooms`.id, `rooms`.`hotel_id`, `room-types`.`type` AS room_type,
+ `rooms`.places, (`rooms`.price * {$nights} + IFNULL(SUM(`transfers`.price), 0)) AS price, COUNT(`transfers`.`id`) as tickets,
+  `hotels`.`hotel`, `hotels`.`description`,  `nutrition`.`name` AS nutrition, `states`.state, `countries`.`country`,
+   `photos`.`path` FROM `rooms` JOIN `hotels` ON `hotels`.id = hotel_id JOIN `states` ON `states`.id = `hotels`.`state_id`
+    JOIN `countries` ON `countries`.id = `states`.`country_id` JOIN `photos`
+     ON `photos`.id = (SELECT id FROM `photos` WHERE `hotel_id` = `hotels`.id LIMIT 1) LEFT JOIN `transfers`
+     ON (`transfers`.`state1_id` = 15 AND `transfers`.state2_id = `states`.id AND `transfers`.`dispatch` = '{$dispatch1}')
+     OR (`transfers`.`state1_id` = `states`.id AND `transfers`.state2_id = 15 AND `transfers`.`dispatch` = '{$dispatch2}')
+     LEFT JOIN `nutrition` ON `nutrition`.`id` = `hotels`.`nutrition_id` JOIN `room-types` ON `room-types`.`id` = `rooms`.`type_id`
+     WHERE (`countries`.`id` = 12 OR `transfers`.`dispatch` = '{$dispatch1}' OR `transfers`.`dispatch` = '{$dispatch2}') 
+     AND (SELECT COUNT(*) FROM `reservations` WHERE `reservations`.`reserved` BETWEEN '{$dispatch1}' AND '{$date_to_check_reservations}' AND `reservations`.`room_id` = `rooms`.`id`) = 0";
             if ($hot == 1) {
-                $query .= " WHERE is_hot = 1";
+                $query .= " AND is_hot = 1";
             }
-            $query .= " GROUP BY id ORDER BY RAND()";
+            $query .= " GROUP BY id) AS temp GROUP BY hotel_id HAVING (tickets = 0 OR tickets = 2) ORDER BY RAND()";
+            //echo $query;
             $result = mysqli_query($link, $query);
             if (!mysqli_query($link, $query)) {
                 exit();

@@ -19,8 +19,8 @@
                 });
             }
         </script>
-        <div style="display:flex; flex-wrap: wrap;">
-            <div style="margin:10px;">
+        <div class="form-container">
+            <div class="form-div">
                 <select class="custom-select none-outline" style='width:200px;' id="countries" name="country"
                         onchange="onChangeCountry(this)">
                     <option value="0">Выбрать страну</option>
@@ -32,7 +32,7 @@
                     ?>
                 </select>
             </div>
-            <div style="margin:10px;">
+            <div class="form-div">
                 <select class="custom-select none-outline" style='width:200px;' id="states" name="state">
                     <option value="0">Выбрать город</option>
                     <?php
@@ -47,7 +47,7 @@
                     ?>
                 </select>
             </div>
-            <div style="margin:10px;">
+            <div class="form-div">
                 <select class="custom-select none-outline" style='width:200px;' id="nutrition" name="nutrition">
                     <option value="0">Выбрать тип питания</option>
                     <?php
@@ -65,7 +65,7 @@
                     ?>
                 </select>
             </div>
-            <div style="margin:10px;">
+            <div class="form-div">
                 <select class="custom-select none-outline" style='width:200px;' id="room-type" name="room-type">
                     <option value="0">Выбрать тип номера</option>
                     <?php
@@ -174,7 +174,7 @@
                     $("#children").attr("value", count);
                 }
             </script>
-            <div tabindex="0" id="dropdownheads-container" style="margin:10px;display: block;">
+            <div tabindex="0" id="dropdownheads-container" class="form-div">
                 <button id="dropdownheads-button" type="button" onmousedown="onHeadsDown()" onclick="onHeadsClick()"
                         class="btn none-outline dropdownheads custom-select">Кто поедет
                 </button>
@@ -232,7 +232,10 @@
                     </div>
                 </div>
             </div>
-            <input id="daterange" type="text" name="daterange" value="<?echo isset($_GET['daterange']) ? $_GET['daterange'] : (date("Y.m.d") . " - " . date("Y.m.d", strtotime(date("m/d/Y")."+5 days"))) ?>"/>
+            <div class="daterange-div">
+                <input id="daterange" class="custom-select" type="text" name="daterange"
+                       value="<? echo isset($_GET['daterange']) ? $_GET['daterange'] : (date("Y.m.d") . " - " . date("Y.m.d", strtotime(date("m/d/Y") . "+5 days"))) ?>"/>
+            </div>
             <script>
                 $(function () {
                     $('input[name="daterange"]').daterangepicker({
@@ -281,6 +284,38 @@
                     });
                 });
             </script>
+            <script>
+                let url_string = window.location.href;
+                let url = new URL(url_string);
+                let range = url.searchParams.get("pricerange");
+                let min_price = 0;
+                let max_price = 100000;
+                if (range) {
+                    min_price = range.split(" ")[0];
+                    max_price = range.split(" ")[2];
+                }
+                $(function () {
+                    $("#pricerange").slider({
+                        range: true,
+                        min: 0,
+                        max: 100000,
+                        step: 100,
+                        values: [min_price, max_price],
+                        slide: function (event, ui) {
+                            $("#amount").val(ui.values[0] + " - " + ui.values[1]);
+                        }
+                    });
+                });
+            </script>
+            <div class="pricerange-div">
+                <p>
+                    <label for="amount">Цена:</label>
+                    <input type="text" id="amount" name="pricerange" readonly
+                           style="border:0; margin-left: 5px; color:#f6931f; font-weight:bold;"
+                           value="<? echo isset($_GET['pricerange']) ? $_GET['pricerange'] : "0 - 100000" ?>">
+                </p>
+                <div id="pricerange"></div>
+            </div>
         </div>
         <button style='margin:10px;' type="submit" class='btn btn-primary'>Поиск</button>
     </form>
@@ -289,7 +324,6 @@
     <script>
         let page = 1;
 
-        //TODO uncomment texxt in whole script
         function onLoadMore() {
             $("#hotel-container").append("<div id=\"loader\" style=\"display: flex; justify-content: center;\"><div class=\"loader\"></div></div>");
             let country = $("#countries")[0].value;
@@ -304,6 +338,7 @@
                 child_ages.push($("#child" + (i + 1))[0].value);
             }
             let daterange = $("#daterange")[0].value;
+            let pricerange = $("#pricerange")[0].value;
             $.post('functions.php', {
                 get_hotels: 0,
                 country,
@@ -315,6 +350,7 @@
                 children,
                 child_ages,
                 daterange,
+                pricerange,
                 page
             }, function (data) {
                 page++;
@@ -333,7 +369,12 @@
                             "<div style='margin-left:10px;margin-top:5px;margin-right:10px; width:100%;'>" +
                             "<a href='/index.php?page=hotel&id=" + hotel['hotel_id'] + "' class='title'>" + hotel['hotel'] + "</a>\n" +
                             "<p class='description'>" + (hotel['description'].length > 300 ? (hotel['description'].substring(0, 300) + "...") : hotel['description']) + "</p>\n" +
-                            "<div class='info-container'><div class='nutrition-container'><img class='image-nutrition' src='../images/nutrition.png'><p class='info-nutrition'>" + hotel['nutrition'] + "</p></div><p class='price'>" + Math.round(hotel['price']) + " грн</p></div>" +
+                            "<div class='info-container'>" +
+                            "<div class='nutrition-container'><img class='image-nutrition' src='../images/nutrition.png'><p class='info-nutrition'>" + hotel['nutrition'] + "</p></div>" +
+                            "<div class='roomtype-container'><img class='image-roomtype' src='../images/room.png'><p class='info-roomtype'>" + hotel['room_type'] + "</p></div>" +
+                            "<div class='places-container'><img class='image-places' src='../images/places.png'><p class='info-places'>x" + hotel['places'] + "</p></div>" +
+                            "<p class='price'>" + Math.round(hotel['price']) + " грн</p>" +
+                            "</div>" +
                             "</div>" +
                             "</div>");
                     })
@@ -359,6 +400,7 @@ if (isset($_GET['children'])) {
     }
 }
 $request['daterange'] = $_GET['daterange'];
+$request['pricerange'] = $_GET['pricerange'];
 $hotels = getHotels($request, $_GET['hot']);
 $result = array();
 $i = 0;
@@ -382,7 +424,13 @@ function showHotel($hotel)
 	<div style='margin-left:10px;margin-top:5px;margin-right:10px; width:100%;'>
 	<a href='/index.php?page=hotel&id=" . $hotel['hotel_id'] . "' class='title'>" . $hotel['hotel'] . "</a>
 	<p class='description'>" . (mb_strlen($hotel['description']) > 300 ? (mb_substr($hotel['description'], 0, 300, 'UTF-8') . "...") : $hotel['description']) . "</p>
-	<div class='info-container'><div class='nutrition-container'><img class='image-nutrition' src='../images/nutrition.png'><p class='info-nutrition'>" . $hotel['nutrition'] . "</p></div><p class='price'>" . round($hotel['price']) . " грн</p></div>
+	<div class='info-container'>
+	<div class='nutrition-container'><img class='image-nutrition' src='../images/nutrition.png'><p class='info-nutrition'>" . $hotel['nutrition'] . "</p></div>
+	<div class='roomtype-container'><img class='image-roomtype' src='../images/room.png'><p class='info-roomtype'>" . $hotel['room_type'] . "</p></div>
+	<div class='places-container'><img class='image-places' src='../images/places.png'><p class='info-places'>x" . $hotel['places'] ."</p></div>
+
+	<p class='price'>" . round($hotel['price']) . " грн</p>
+	</div>
 	</div>
 	</div>";
 }
