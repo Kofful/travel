@@ -110,6 +110,28 @@ input {
     box-shadow: 0 0 4px 4px rgba(0, 0, 0, 0.1);
 }
 
+.main-gradient-div {
+    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0) 90%);
+    position: absolute;
+    height: 120px;
+    width:250px;
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 10px 0 10px;
+}
+
+.main-gradient-div p {
+    color: lightgray;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.main-img {
+    min-width:250px;
+    width:250px;
+    height:166px;
+}
+
 .main-title {
     font-size: 20px;
     margin: 5px 0 0 5px;
@@ -211,12 +233,12 @@ input {
 
 .nutrition-container {
     display: flex;
-    width: 135px;
+    min-width: 135px;
     align-items: center;
 }
 
 .info-nutrition {
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .image-nutrition {
@@ -232,7 +254,7 @@ input {
 }
 
 .info-roomtype {
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .image-roomtype {
@@ -249,7 +271,7 @@ input {
 }
 
 .info-places {
-    font-size: 16px;
+    font-size: 18px;
 }
 
 .image-places {

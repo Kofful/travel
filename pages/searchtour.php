@@ -1,3 +1,5 @@
+
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <div style='background-color: rgba(173, 216, 230, 0.2); width:100%'>
     <form action="index.php?page=searchtour" method="get">
         <input name="page" value="searchtour" style='display:none;'>
@@ -367,7 +369,7 @@
                         hotels.append("<div class='list-item'>\n" +
                             "<img src='../images/uploads/" + hotel["path"] + "' style='min-width:200px;width:200px;height:133px;align-self:center'>" +
                             "<div style='margin-left:10px;margin-top:5px;margin-right:10px; width:100%;'>" +
-                            "<a href='/index.php?page=hotel&id=" + hotel['hotel_id'] + "' class='title'>" + hotel['hotel'] + "</a>\n" +
+                            "<a href='/index.php?page=hotel&id="+ hotel['id'] +"' class='title'>" + hotel['hotel'] + "</a>\n" +
                             "<p class='description'>" + (hotel['description'].length > 300 ? (hotel['description'].substring(0, 300) + "...") : hotel['description']) + "</p>\n" +
                             "<div class='info-container'>" +
                             "<div class='nutrition-container'><img class='image-nutrition' src='../images/nutrition.png'><p class='info-nutrition'>" + hotel['nutrition'] + "</p></div>" +
@@ -384,7 +386,6 @@
         }
     </script>
 <?php
-//TODO add room type png
 //формирование запроса отелей
 $request = array();
 $request['country'] = $_GET['country'];
@@ -422,7 +423,7 @@ function showHotel($hotel)
     echo "<div class='list-item'>
 	<img src='../images/uploads/" . $hotel['path'] . "' style='min-width:200px;width:200px;height:133px;align-self:center'>
 	<div style='margin-left:10px;margin-top:5px;margin-right:10px; width:100%;'>
-	<a href='/index.php?page=hotel&id=" . $hotel['hotel_id'] . "' class='title'>" . $hotel['hotel'] . "</a>
+	<a href='/index.php?page=hotel&id=". $hotel['id'] . "' class='title'>" . $hotel['hotel'] . "</a>
 	<p class='description'>" . (mb_strlen($hotel['description']) > 300 ? (mb_substr($hotel['description'], 0, 300, 'UTF-8') . "...") : $hotel['description']) . "</p>
 	<div class='info-container'>
 	<div class='nutrition-container'><img class='image-nutrition' src='../images/nutrition.png'><p class='info-nutrition'>" . $hotel['nutrition'] . "</p></div>

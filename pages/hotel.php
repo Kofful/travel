@@ -1,5 +1,5 @@
 <?php 
-$hotel = getHotelInfo($_GET['id']);
+$hotel = getHotelInfo($_GET['id'], $_GET['daterange']);
 ?>
 <div>
 	<p class='hotel-title'><?php echo $hotel['hotel'];?></p>

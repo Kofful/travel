@@ -341,7 +341,6 @@ function getStates($index)
 
 //получение отелей с выборкой
 //$hot не входит в $request по причине большого количества использований функции getHotels() с разными параметрами
-//TODO check reservation at main page too
 function getHotels($request = 0, $hot = 0, $page = 0)//page ВСЕГДА ПОСЛЕДНИЙ ПАРАМЕТР!!!!!
 {
     $page *= 10;
@@ -475,7 +474,7 @@ function getMainHotels($hot)
                 if ($flag) {
                     $final[$i] = $room;
                     $final[$i]['nights'] = $nights;
-                    $final[$i]['dispatch'] = date("d.m.Y", $dispatch1);
+                    $final[$i]['dispatch'] = date("d.m.Y", strtotime($dispatch1));
                     $i++;
                     break;
                 }
@@ -504,19 +503,38 @@ function getPhotos($hotel)
 }
 
 //получить информацию об отеле
-function getHotelInfo($id)
+//id - поле в таблице `rooms`
+function getHotelInfo($id, $daterange)
 {
     $link = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
     if (!$link) {
         exit();
     } else {
-        $query = "SELECT `hotels`.hotel, `hotels`.id, `hotels`.description,	 `states`.state, `countries`.country FROM `hotels` JOIN `states` ON `states`.id = `hotels`.state_id JOIN `countries` ON `countries`.id = `states`.country_id WHERE `hotels`.id = $id";
+        $daterange = explode(" ", str_replace(".", "/", $daterange));
+        $dispatch1 = strtotime($daterange[0]);
+        $dispatch2 = strtotime($daterange[2]);
+        $dispatch1 = date("Y-m-d", $dispatch1);
+        $dispatch2 = date("Y-m-d", $dispatch2);
+        $date_to_check_reservations = date('Y-m-d', strtotime($dispatch2 . ' +1 days'));
+        $interval = date_diff(date_create($dispatch1), date_create($dispatch2));
+        $nights = intval($interval->format("%a"));
+        $query = "SELECT `rooms`.id, `rooms`.`hotel_id`, `room-types`.`type` AS room_type,
+ `rooms`.places, (`rooms`.price * {$nights} + IFNULL(SUM(`transfers`.price), 0)) AS price, COUNT(`transfers`.`id`) as tickets,
+  `hotels`.`hotel`, `hotels`.`description`,  `nutrition`.`name` AS nutrition, `states`.state, `countries`.`country`,
+   `photos`.`path` FROM `rooms` JOIN `hotels` ON `hotels`.id = hotel_id JOIN `states` ON `states`.id = `hotels`.`state_id`
+    JOIN `countries` ON `countries`.id = `states`.`country_id` JOIN `photos`
+     ON `photos`.id = (SELECT id FROM `photos` WHERE `hotel_id` = `hotels`.id LIMIT 1) LEFT JOIN `transfers`
+     ON (`transfers`.`state1_id` = 15 AND `transfers`.state2_id = `states`.id AND `transfers`.`dispatch` = '{$dispatch1}')
+     OR (`transfers`.`state1_id` = `states`.id AND `transfers`.state2_id = 15 AND `transfers`.`dispatch` = '{$dispatch2}')
+     LEFT JOIN `nutrition` ON `nutrition`.`id` = `hotels`.`nutrition_id` JOIN `room-types` ON `room-types`.`id` = `rooms`.`type_id`
+     WHERE (`countries`.`id` = 12 OR `transfers`.`dispatch` = '{$dispatch1}' OR `transfers`.`dispatch` = '{$dispatch2}') 
+     AND (SELECT COUNT(*) FROM `reservations` WHERE `reservations`.`reserved` BETWEEN '{$dispatch1}' AND '{$date_to_check_reservations}' AND `reservations`.`room_id` = `rooms`.`id`) = 0 AND `rooms`.`id` = {$id}";
         $result = mysqli_query($link, $query);
         if (!mysqli_query($link, $query)) {
             exit();
         }
         $hotel = mysqli_fetch_array($result);
-        $query = "SELECT * FROM `photos` WHERE hotel_id = $id";
+        $query = "SELECT * FROM `photos` WHERE hotel_id = {$hotel['hotel_id']}";
         $result = mysqli_query($link, $query);
         if (!mysqli_query($link, $query)) {
             exit();
