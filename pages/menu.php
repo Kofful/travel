@@ -3,6 +3,7 @@
 		<li class="nav-item"><a type="button" class="nav-link <?php if(!isset($_GET['page'])){echo 'active';}?>" href="/">Главная</a></li>
 		<li class="nav-item"><a type="button" class="nav-link <?php if($_GET['page']=="searchtour" && $_GET['hot']!=1){echo 'active';}?>" href="index.php?page=searchtour">Поиск туров</a></li>
 		<li class="nav-item"><a type="button" class="nav-link <?php if($_GET['page']=="searchtour" && $_GET['hot']==1){echo 'active';}?>" href="index.php?page=searchtour&hot=1">Горящие туры</a></li>
+        <li class="nav-item"><a type="button" class="nav-link <?php if($_GET['page']=="hotels"){echo 'active';}?>" href="index.php?page=hotels">Отели</a></li>
 	</ul>
 	<?php
 	if(!isset($_SESSION['permit'])) {

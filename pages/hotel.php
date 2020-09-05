@@ -1,5 +1,11 @@
-<?php 
-$hotel = getHotelInfo($_GET['id'], $_GET['daterange']);
+<?php
+if(isset($_GET['room_id']) && isset($_GET['daterange'])) {
+    $hotel = getHotelInfo($_GET['id'], $_GET['daterange']);
+} else if(isset($_GET['id'])) {
+    //get hotel
+} else {
+    //show 404
+}
 ?>
 <div>
 	<p class='hotel-title'><?php echo $hotel['hotel'];?></p>

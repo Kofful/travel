@@ -60,9 +60,12 @@ session_start();
                                         } else
                                             if ($page == "hotel") {
                                                 include_once("pages/hotel.php");
-                                            } else {
-                                                echo "<script>window.location.href='/'</script>";
-                                            }
+                                            } else
+                                                if ($page == "hotels") {
+                                                    include_once("pages/hotels.php");
+                                                } else {
+                                                    echo "<script>window.location.href='/'</script>";
+                                                }
                 } else {
                     echo "<script>window.location.href='/'</script>";
                 }
@@ -98,7 +101,7 @@ session_start();
         crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
 <script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>
 </body>
 </html>

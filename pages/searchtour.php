@@ -25,7 +25,7 @@
             <div class="form-div">
                 <select class="custom-select none-outline" style='width:200px;' id="countries" name="country"
                         onchange="onChangeCountry(this)">
-                    <option value="0">Выбрать страну</option>
+                    <option value="0">Все страны</option>
                     <?php
                     $countries = getCountries();
                     while ($row = mysqli_fetch_array($countries)) {
@@ -36,7 +36,7 @@
             </div>
             <div class="form-div">
                 <select class="custom-select none-outline" style='width:200px;' id="states" name="state">
-                    <option value="0">Выбрать город</option>
+                    <option value="0">Все города</option>
                     <?php
                     if (isset($_GET['country'])) {
                         $states = getStates($_GET['country']);
@@ -51,7 +51,7 @@
             </div>
             <div class="form-div">
                 <select class="custom-select none-outline" style='width:200px;' id="nutrition" name="nutrition">
-                    <option value="0">Выбрать тип питания</option>
+                    <option value="0">Любой тип питания</option>
                     <?php
                     $nutritions = [
                         "1" => "без питания",
@@ -69,7 +69,7 @@
             </div>
             <div class="form-div">
                 <select class="custom-select none-outline" style='width:200px;' id="room-type" name="room-type">
-                    <option value="0">Выбрать тип номера</option>
+                    <option value="0">Любой тип номера</option>
                     <?php
                     $room_types = [
                         "1" => "Apartment",
@@ -369,7 +369,7 @@
                         hotels.append("<div class='list-item'>\n" +
                             "<img src='../images/uploads/" + hotel["path"] + "' style='min-width:200px;width:200px;height:133px;align-self:center'>" +
                             "<div style='margin-left:10px;margin-top:5px;margin-right:10px; width:100%;'>" +
-                            "<a href='/index.php?page=hotel&id="+ hotel['id'] +"' class='title'>" + hotel['hotel'] + "</a>\n" +
+                            "<a href='/index.php?page=hotel&id="+ hotel['hotel_id'] + "&room_id="+ hotel['id'] + "&daterange=" + daterange + "' class='title'>" + hotel['hotel'] + "</a>\n" +
                             "<p class='description'>" + (hotel['description'].length > 300 ? (hotel['description'].substring(0, 300) + "...") : hotel['description']) + "</p>\n" +
                             "<div class='info-container'>" +
                             "<div class='nutrition-container'><img class='image-nutrition' src='../images/nutrition.png'><p class='info-nutrition'>" + hotel['nutrition'] + "</p></div>" +
@@ -400,9 +400,10 @@ if (isset($_GET['children'])) {
         $request["child-ages"][$i - 1] = $_GET["child{$i}"];
     }
 }
-$request['daterange'] = $_GET['daterange'];
+$request['daterange'] = isset($_GET['daterange']) ? $_GET['daterange'] : (date("Y.m.d") . " - " . date("Y.m.d", strtotime(date("m/d/Y") . "+5 days")));
+;
 $request['pricerange'] = $_GET['pricerange'];
-$hotels = getHotels($request, $_GET['hot']);
+$hotels = getTours($request, $_GET['hot']);
 $result = array();
 $i = 0;
 while ($row = mysqli_fetch_array($hotels)) {
@@ -410,7 +411,7 @@ while ($row = mysqli_fetch_array($hotels)) {
     $i++;
 }
 for ($i = 0; $i < sizeof($result); $i++) {
-    showHotel($result[$i]);
+    showHotel($result[$i], $request['daterange']);
 }
 echo "</div>";
 if (count($result) == 10)
@@ -418,12 +419,12 @@ if (count($result) == 10)
 
 
 //вывести отель на экран
-function showHotel($hotel)
+function showHotel($hotel, $daterange)
 {
     echo "<div class='list-item'>
 	<img src='../images/uploads/" . $hotel['path'] . "' style='min-width:200px;width:200px;height:133px;align-self:center'>
 	<div style='margin-left:10px;margin-top:5px;margin-right:10px; width:100%;'>
-	<a href='/index.php?page=hotel&id=". $hotel['id'] . "' class='title'>" . $hotel['hotel'] . "</a>
+	<a href='/index.php?page=hotel&id=". $hotel['hotel_id'] . "&room_id=" . $hotel['id'] . "&daterange=" . $daterange . "' class='title'>" . $hotel['hotel'] . "</a>
 	<p class='description'>" . (mb_strlen($hotel['description']) > 300 ? (mb_substr($hotel['description'], 0, 300, 'UTF-8') . "...") : $hotel['description']) . "</p>
 	<div class='info-container'>
 	<div class='nutrition-container'><img class='image-nutrition' src='../images/nutrition.png'><p class='info-nutrition'>" . $hotel['nutrition'] . "</p></div>

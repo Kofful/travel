@@ -18,7 +18,7 @@ function showHotel($hotel)
 </div>
 	<img class='main-img' src = '../images/uploads/" . $hotel['path'] . "'>
 	</div>  
-	<a href='/index.php?page=hotel&id=" . $hotel['id'] . "&daterange=". $daterange."' class='main-title'>" . $hotel['hotel'] . "</a>
+	<a href='/index.php?page=hotel&id=".$hotel['hotel_id']."&room_id=" . $hotel['id'] . "&daterange=". $daterange."' class='main-title'>" . $hotel['hotel'] . "</a>
 	<p class='main-location'>" . $hotel['country'] . ", " . $hotel['state'] . "</p>
 	<p class='main-price'>" . $hotel['price'] . " грн</p>
 	</div>";

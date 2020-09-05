@@ -320,6 +320,11 @@ input {
     margin: 10px;
 }
 
+.form-search {
+    margin: 10px;
+    min-width: 400px;
+}
+
 .daterange-div {
     margin: 10px;
     flex-grow: 1;

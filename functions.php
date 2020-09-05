@@ -170,7 +170,7 @@ if (isset($_POST['get_states'])) {
     echo json_encode($result);
 }
 
-//получить отели jquery
+//получить туры jquery
 if (isset($_POST['get_hotels'])) {
     $request = array();
     if (isset($_POST['state'])) {
@@ -204,7 +204,7 @@ if (isset($_POST['get_hotels'])) {
     if (isset($_POST['pricerange'])) {
         $request['pricerange'] = $_POST['pricerange'];
     }
-    $hotels = getHotels($request, $hot, $page);
+    $hotels = getTours($request, $hot, $page);
     $resut = array();
     $i = 0;
     while ($row = mysqli_fetch_array($hotels)) {
@@ -214,6 +214,30 @@ if (isset($_POST['get_hotels'])) {
     echo json_encode($result);
 }
 
+//искать отели jquery
+if(isset($_POST['search_hotels'])) {
+    $request = array();
+    if (isset($_POST['state'])) {
+        $request['state'] = $_POST['state'];
+    }
+    if (isset($_POST['country'])) {
+        $request['country'] = $_POST['country'];
+    }
+    if (isset($_POST['name'])) {
+        $request['name'] = $_POST['name'];
+    }
+    if (isset($_POST['page'])) {
+        $page = $_POST['page'];
+    }
+    $hotels = getHotels($request, $page);
+    $resut = array();
+    $i = 0;
+    while ($row = mysqli_fetch_array($hotels)) {
+        $result[$i] = $row;
+        $i++;
+    }
+    echo json_encode($result);
+}
 //регистрация (3 функции)
 function clean($value = "")
 {
@@ -339,9 +363,9 @@ function getStates($index)
 }
 
 
-//получение отелей с выборкой
-//$hot не входит в $request по причине большого количества использований функции getHotels() с разными параметрами
-function getHotels($request = 0, $hot = 0, $page = 0)//page ВСЕГДА ПОСЛЕДНИЙ ПАРАМЕТР!!!!!
+//получение туров с выборкой
+//$hot не входит в $request по причине большого количества использований функции getTours() с разными параметрами
+function getTours($request = 0, $hot = 0, $page = 0)//page ВСЕГДА ПОСЛЕДНИЙ ПАРАМЕТР!!!!!
 {
     $page *= 10;
     $link = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
@@ -419,6 +443,36 @@ function getHotels($request = 0, $hot = 0, $page = 0)//page ВСЕГДА ПОС�
         $query .= " AND `hotels`.`min_age` <= {$min_age}";
 
         $query .= " GROUP BY id) AS temp GROUP BY hotel_id HAVING (tickets = 0 OR tickets = 2) AND price > {$min_price} AND price < {$max_price} ORDER BY id DESC LIMIT $page, 10";
+        //echo $query;
+        $result = mysqli_query($link, $query);
+        if (!mysqli_query($link, $query)) {
+            exit();
+        }
+        return $result;
+    }
+    mysqli_close($link);
+}
+
+function getHotels($request = 0, $page = 0) {
+    $page *= 10;
+    $link = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+    if (!$link) {
+        echo "No connection<br>" . mysqli_connect_error();
+        exit();
+    } else {
+        $query = "SELECT `hotels`.`id`, `hotels`.`hotel`, `hotels`.`description`, `hotels`.`min_age`, `states`.`state`, `countries`.`country`, `photos`.`path` 
+FROM `hotels` JOIN `states` ON `states`.`id` = `hotels`.`state_id` JOIN `countries` ON `countries`.`id` = `states`.`country_id` JOIN `photos`
+     ON `photos`.id = (SELECT id FROM `photos` WHERE `hotel_id` = `hotels`.id LIMIT 1) WHERE `is_hot` < 2";
+        if (isset($request["country"]) && $request["country"] != 0) {
+            $query .= " AND `countries`.`id` = {$request["country"]}";
+        }
+        if (isset($request["state"]) && $request["state"] != 0) {
+            $query .= " AND `states`.`id` = {$request["state"]}";
+        }
+        if (isset($request["name"]) && $request["name"] != "") {
+            $query .= " AND `hotels`.`hotel` LIKE '%{$request['name']}%'";
+        }
+        $query .= " ORDER BY id DESC LIMIT $page, 10";
         //echo $query;
         $result = mysqli_query($link, $query);
         if (!mysqli_query($link, $query)) {
